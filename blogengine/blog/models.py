@@ -5,14 +5,14 @@ from time import time
 
 
 def gen_slug(s):
-    return slugify(s, allow_unicode=True) + '-' + str(int(time()))
+    return f'{slugify(s, allow_unicode=True)}-{int(time())}'
 
 
 class Post(models.Model):
     title = models.CharField(max_length=150, db_index=True)
-    slug = models.SlugField(max_length=150, unique=True)
-    body = models.TextField(blank=True, db_index=True)
-    tags = models.ManyToManyField('Tag', blank=True, related_name='posts')
+    slug = models.SlugField(max_length=150, unique=True, blank=True)
+    body = models.TextField(db_index=True, blank=True)
+    tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
     date_pub = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -41,7 +41,7 @@ class Tag(models.Model):
     slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
-                ordering = ['title']
+        ordering = ['title']
 
     def get_absolute_url(self):
         return reverse('tag_detail_url', kwargs={'slug': self.slug})
