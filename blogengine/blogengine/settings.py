@@ -37,8 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
+    'social_django',
+
     'blog',
+    'api'
 ]
 
 MIDDLEWARE = [
@@ -66,6 +70,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -74,30 +81,46 @@ TEMPLATES = [
 WSGI_APPLICATION = 'blogengine.wsgi.application'
 
 
+AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
+        'social_core.backends.github.GithubOAuth2',
+)
+
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-'''
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'blog_db',
-        'USER': 'blog_user',
-        'PASSWORD': 'jingle_balls',
+        'USER': 'vanzoon',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 
+
+REST_FRAMEWORK = {
+        'DEFAULT_RENDERER_CLASSES': [
+                    'rest_framework.renderers.JSONRenderer',
+                ],
+        'DEFAULT_PARSER_CLASSES': [
+                    'rest_framework.parsers.JSONParser',
+                ]
+}
+        #'DEFAULT_AUTHENTICATION_CLASSES': [
+                    #'rest_framework.authentication.TokenAuthentication',
+        #]
+
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+
+SOCIAL_AUTH_GITHUB_KEY = '0d87851d83495736894e'
+SOCIAL_AUTH_GITHUB_SECRET = '501d3443d6b2f5d8fd044f2bea20a9996473aa40'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

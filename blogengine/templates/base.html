@@ -26,7 +26,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Navbar</a>
+    <a class="navbar-brand" href="/blog">Blog</a>
     <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
             class="navbar-toggler"
             data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
@@ -56,33 +56,8 @@
     <div class="row">
         <div class="col-6 offset-md-2">
             {% block content %}
-            content for you
+            There is no content for you
             {% endblock %}
-            {% if is_paginated %}
-
-            <nav aria-label="...">
-                <ul class="pagination">
-                    <li class="page-item {% if not prev_url %} disabled {% endif %}">
-                        <a aria-disabled="true" class="page-link" href="{{ prev_url }}" tabindex="-1">Previous</a>
-                    </li>
-
-                    {% for n in page_object.paginator.page_range %}
-                    {% if page_object.number == n %}
-                    <li aria-current="page" class="page-item active">
-                        <a class="page-link" href="?page={{ n }}">{{ n }}<span class="sr-only">(current)</span></a>
-                    </li>
-                    {% elif n > page_object.number|add:-3 and n < page_object.number|add:3 %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ n }}">{{ n }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                    <li class="page-item {% if not next_url %} disabled {% endif %}">
-                        <a aria-disabled="true" class="page-link" href="{{ next_url }}" tabindex="-1">Next</a>
-                    </li>
-                </ul>
-            </nav>
-            {% endif %}
         </div>
     </div>
 </div>
