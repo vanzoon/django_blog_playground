@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import Count, When, Case
+from django.db.models import Count, When, Case, Avg
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import UpdateModelMixin
@@ -20,8 +20,10 @@ from .permissions import IsAuthorOrStaffOrReadOnly
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all().annotate(
-            likes_count_annotate=Count(Case(When(userpostrelation__like=True,
-                                                 then=1))))
+        likes_count_annotate=
+            Count(Case(When(userpostrelation__like=True, then=1))),
+        rating=Avg('userpostrelation__rate')
+    )
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]

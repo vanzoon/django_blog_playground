@@ -1,8 +1,7 @@
 import json
-from time import sleep
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, Avg
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -17,24 +16,37 @@ class PostApiTestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='test_user')
         self.post_1 = Post.objects.create(title='sample cute title',
-                                          slug='asbc_dfs 123*/&()%#@!?', body='cv', author=self.user)
+                                          slug='asbc_dfs 123*/&()%#@!?',
+                                          body='cv',
+                                          author=self.user,
+                                          )
         self.post_2 = Post.objects.create(title='sample cuter title',
-                                          slug='asbc)%#@!?', body='asdf bpot')
+                                          slug='asbc)%#@!?',
+                                          body='asdf bpot',
+                                          )
+        UserPostRelation.objects.create(user=self.user, post=self.post_1, like=True)
+        UserPostRelation.objects.create(user=self.user, post=self.post_1, rate=5)
+        UserPostRelation.objects.create(user=self.user, post=self.post_2, like=False)
 
-    def test_get_response_status_200(self):
-        url = reverse('post-list')
-        response = self.client.get(url)
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
 
     def test_get_send_valid_response(self):
         url = reverse('post-list')
 
         response = self.client.get(url)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
         posts = Post.objects.all().annotate(
-            likes_count_annotate=Count(Case(When(userpostrelation__like=True,
-                                                 then=1))))
+        likes_count_annotate=
+            Count(Case(When(userpostrelation__like=True, then=1))),
+        rating=Avg('userpostrelation__rate')
+        )
+
         serialized_data = PostSerializer(posts, many=True).data
         self.assertEqual(serialized_data, response.data)
+        self.assertEqual(serialized_data[0]['likes_count'], 1)
+        self.assertEqual(serialized_data[0]['likes_count_annotate'], 1)
+        self.assertEqual(serialized_data[0]['rating'], '5.00')
+        self.assertEqual(serialized_data[1]['likes_count'], 0)
+        self.assertEqual(serialized_data[1]['rating'], None)
 
     def test_create(self):
         self.client.force_login(self.user)
@@ -42,7 +54,10 @@ class PostApiTestCase(APITestCase):
         url = reverse('post-list')
         data = {
             "title": "network switch",
-            "body": "A network switch (also called switching hub, bridging hub, and MAC bridge) is networking hardware that connects devices on a computer network by using packet switching to receive and forward data to the destination device.",
+            "body": "A network switch (also called switching hub, bridging hub, \
+            and MAC bridge) is networking hardware that connects devices on \
+            a computer network by using packet switching to receive and \
+            forward data to the destination device.",
             "slug": "rew"
         }
 
@@ -101,7 +116,9 @@ class PostApiTestCase(APITestCase):
 
         data = {
             "title": self.post_1.title,
-            "body": "A network switch is networking hardware that connects devices on a computer network by using packet switching to receive and forward data to the destination device.",
+            "body": "A network switch is networking hardware that connects devices \
+             on a computer network by using packet switching to receive and \
+             forward data to the destination device.",
             "slug": "blueredgreen"
         }
 
@@ -148,9 +165,13 @@ class UserPostRelationTestCase(APITestCase):
         self.user_1= User.objects.create(username='test_user_1')
         self.user_2 = User.objects.create(username='test_user_2')
         self.post_1 = Post.objects.create(title='sample cute title',
-                                          slug='asbc_dfs 123*/&()%#@!?', body='cv', author=self.user_1)
+                                          slug='asbc_dfs 123*/&()%#@!?',
+                                          body='cv',
+                                          author=self.user_1)
         self.post_2 = Post.objects.create(title='sample cuter title',
-                                          slug='asbc)%#@!?', body='asdf bpot', author=self.user_2)
+                                          slug='asbc)%#@!?',
+                                          body='asdf bpot',
+                                          author=self.user_2)
 
 
     def test_like(self):

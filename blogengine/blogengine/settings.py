@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'social_django',
 
     'blog',
-    'api'
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +62,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates')
-            ],
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,9 +112,11 @@ REST_FRAMEWORK = {
                     'rest_framework.parsers.JSONParser',
                 ]
 }
-        #'DEFAULT_AUTHENTICATION_CLASSES': [
-                    #'rest_framework.authentication.TokenAuthentication',
-        #]
+'''
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+                    'rest_framework.authentication.TokenAuthentication',
+        ]
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
