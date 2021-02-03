@@ -1,4 +1,5 @@
-from django.urls import path
+from django.conf import settings
+from django.urls import path, include
 
 from .views import *
 
@@ -15,3 +16,8 @@ urlpatterns = [
     path('tag/<str:slug>/delete/', TagDelete.as_view(), name='tag_delete_url')
 ]
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

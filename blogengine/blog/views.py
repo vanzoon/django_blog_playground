@@ -97,3 +97,8 @@ class TagDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
 def tags_list(request):
     tags = Tag.objects.all()
     return render(request, 'blog/tags_list.html', context={'tags': tags})
+
+
+class Favorites():
+    pass
+

@@ -31,7 +31,7 @@ class ObjectCreateMixin:
             new_obj = bound_form.save()
             return redirect(new_obj)
 
-        return render(request, self.template, context= {'form': bound_form})
+        return render(request, self.template, context={'form': bound_form})
 
 
 class ObjectUpdateMixin:
@@ -44,8 +44,7 @@ class ObjectUpdateMixin:
         bound_form = self.form_model(instance=obj) 
         return render(request, self.template,
                       context={'form': bound_form,
-                          self.model.__name__.lower(): obj})
-
+                               self.model.__name__.lower(): obj})
 
     def post(self, request, slug):
         obj = self.model.objects.get(slug__iexact=slug)

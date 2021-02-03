@@ -1,6 +1,7 @@
 from time import time
 from django.db import models
 from django.shortcuts import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 from django.contrib.auth.models import User
@@ -35,6 +36,8 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             self.slug = f'{gen_slug(self.title)}-{int(time())}'
+        else:
+            self.last_modify_date = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from django.db.models import Count, When, Case, Avg
 from django.shortcuts import render
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import UpdateModelMixin
 
@@ -20,10 +19,10 @@ from .permissions import IsAuthorOrStaffOrReadOnly
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all().annotate(
-        likes_count_annotate=
-            Count(Case(When(userpostrelation__like=True, then=1))),
+        bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
+        likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
         rating=Avg('userpostrelation__rate')
-    )
+    ).select_related('author').prefetch_related('viewers')
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -36,7 +35,7 @@ class PostViewSet(ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
-        self.get_object().last_modify_date = datetime.now()
+        self.get_object().last_modify_date = timezone.now()
         serializer.save()
 
 

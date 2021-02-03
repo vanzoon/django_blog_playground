@@ -1,25 +1,37 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from blog.models import Post, UserPostRelation
 
+
+class PostViewersSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+
 class PostSerializer(ModelSerializer):
-    likes_count = serializers.SerializerMethodField()
-    likes_count_annotate = serializers.IntegerField(read_only=True)
+    # likes_count = serializers.SerializerMethodField()
+    pub_date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False,
+                                         read_only=True)
+    author = serializers.CharField(source='author.username', default='', read_only=True)
+    bookmarked_count = serializers.IntegerField(read_only=True)
+    likes_count = serializers.IntegerField(read_only=True)
     rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
-    pub_date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False)
+    viewers = PostViewersSerializer(many=True, read_only=True)
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'body', 'pub_date', 'slug',
-                  'likes_count', 'likes_count_annotate', 'rating']
-
-    def get_likes_count(self, instance):
-        return UserPostRelation.objects.filter(post=instance, like=True).count()
+        fields = ('id', 'title', 'body', 'pub_date', 'slug', 'bookmarked_count',
+                  'likes_count', 'rating', 'author', 'viewers')
+    # def get_likes_count(self, instance):
+    #     return UserPostRelation.objects.filter(post=instance, like=True).count()
 
 
 class UserPostRelationSerializer(ModelSerializer):
+#    rate = serializers.CharField(source='get_rate_display', read_only=True)
 
     class Meta:
         model = UserPostRelation
         fields = ('post', 'like', 'in_bookmarks', 'rate')
-
