@@ -1,12 +1,9 @@
 from django.views.generic import View
 from django.db.models import Q
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, get_object_or_404, render
-from django.urls import reverse
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Post, Tag
 from .forms import TagForm, PostForm
 from .utils import *
 

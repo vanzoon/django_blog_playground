@@ -40,7 +40,7 @@ class PostApiTestCase(APITestCase):
         posts = Post.objects.all().annotate(
             bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
             likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-            rating=Avg('userpostrelation__rate')
+            # rating=Avg('userpostrelation__rate')
         )
         serialized_data = PostSerializer(posts, many=True).data
         self.assertEqual(serialized_data, response.data)

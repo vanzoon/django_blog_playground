@@ -5,9 +5,19 @@
 {% endblock %}
 
 {% block content %}
-     <h1 class="mt-5">
+<div>
+    <h1 class="mt-5">
          {{ post.title }}
-     </h1>
+    </h1>
+    <h2 class="mb-5">
+        Author: {{ post.author }}
+    </h2>
+
+    {% if user.is_authenticated and user.get_username == post.author.username %}
+        <a href="{{ post.get_update_url }}">edit</a>
+        <a href="{{ post.get_delete_url }}">delete</a>
+    {% endif %}
+</div>
      <p>
          {{ post.body }}
      </p>

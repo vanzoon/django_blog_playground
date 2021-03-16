@@ -7,8 +7,13 @@ from blog.models import Post, Tag
 def redirect_to_blog(request):
     return redirect('posts_list_url', permanent=True)
 
+
 def auth(request):
     return render(request, 'oauth.html')
+
+
+def login(request):
+    return render(request, 'login.html')
 
 
 class RobotsTxtView(TemplateView):
@@ -16,6 +21,7 @@ class RobotsTxtView(TemplateView):
     content_type = 'text/plain'
 # or even
 # path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+
 
 class SitemapXmlView(TemplateView):
     template_name = 'sitemap_xml.html'

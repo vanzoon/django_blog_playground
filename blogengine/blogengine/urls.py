@@ -17,13 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
-from .views import redirect_to_blog, auth
+from .views import redirect_to_blog, auth, login
 
 urlpatterns = [
     path('', redirect_to_blog),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('auth/', auth),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('blog/', include('blog.urls')),
     url('', include('social_django.urls', namespace='social'))
 ]

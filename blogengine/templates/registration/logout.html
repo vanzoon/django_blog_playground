@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Login - {{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+    {% if next %}
+        {%if user.is_authenticated %}
+            <p>your account does not have access to this page. Please login with the account that has access.</p>
+        {% else %}
+            <p>please login to see this page</p>
+        {% endif %}
+    {% endif %}
+
+ <div class="container mb-5">
+     <a href="{% url "social:begin" "github" %}">login with Github</a>
+ </div>
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+        {% if field.errors %}
+            <div class="alert alert-danger">
+                {{ field.errors }}
+            </div>
+        {% endif %}
+
+        {{ field.label }}
+        {{ field }}
+    </div>
+    {% endfor %}
+  <button type="submit" class="btn btn-primary" value="login">Login</button>
+  <input type="hidden" name="next" value="{{ next }}" />
+
+  {# Assumes you setup the password_reset view in your URLconf #}
+    <a href="{% url 'password_reset' %}">Lost password?</a>
+</form>
+
+{% endblock %}

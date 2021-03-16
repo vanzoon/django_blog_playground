@@ -20,6 +20,7 @@ class Post(models.Model):
     last_modify_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     viewers = models.ManyToManyField(User, through='UserPostRelation', related_name='read_posts')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
 
     class Meta:
         ordering = ['-pub_date']
@@ -59,6 +60,22 @@ class UserPostRelation(models.Model):
 
     def __str__(self):
         return f'{self.user}, post: {self.post.title}, rated as {self.rate}'
+
+    def __init__(self, *args, **kwargs):
+        super(UserPostRelation, self).__init__(*args, **kwargs)
+        self.old_rate = self.rate
+
+    def save(self, *args, **kwargs):
+        '''
+        creating = not self.pk
+        # old_rate = self.rate
+
+
+        if self.old_rate != self.rate or creating:
+        '''
+        super().save(*args, **kwargs)
+        from api.logic import set_rating
+        set_rating(self.post)
 
 
 class Tag(models.Model):

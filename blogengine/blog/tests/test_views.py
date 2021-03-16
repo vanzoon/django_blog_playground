@@ -57,11 +57,11 @@ class PostViewsTestCase(TestCase):
         self.client.force_login(user=self.user_1)
         url = reverse('post_delete_url', kwargs={'slug': self.post_1.slug})
         response = self.client.delete(url)
-        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         try:
             self.post_1.refresh_from_db()
         except ObjectDoesNotExist:
             pass
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
 
 class TagViewsTestCase(TestCase):
     pass
