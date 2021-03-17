@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
-from .views import redirect_to_blog, auth, login
+from .views import redirect_to_blog
 
 urlpatterns = [
     path('', redirect_to_blog),

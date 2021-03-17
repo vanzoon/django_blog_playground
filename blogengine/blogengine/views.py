@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from blog.models import Post, Tag
@@ -6,14 +6,6 @@ from blog.models import Post, Tag
 
 def redirect_to_blog(request):
     return redirect('posts_list_url', permanent=True)
-
-
-def auth(request):
-    return render(request, 'oauth.html')
-
-
-def login(request):
-    return render(request, 'login.html')
 
 
 class RobotsTxtView(TemplateView):

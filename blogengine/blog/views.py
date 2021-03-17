@@ -40,7 +40,6 @@ def posts_list(request):
     return render(request, 'blog/index.html', context=context)
 
 
-
 class PostDetail(ObjectDetailMixin, View):
     model = Post
     template = 'blog/post_detail.html'
@@ -98,4 +97,3 @@ def tags_list(request):
 
 class Favorites():
     pass
-
