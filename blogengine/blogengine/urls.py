@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
 
+from send_email.views import ContactView
 from .views import redirect_to_blog
 
 urlpatterns = [
@@ -25,5 +26,6 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('blog/', include('blog.urls')),
+    path('contact/', ContactView.as_view(), name='contact_url'),
     url('', include('social_django.urls', namespace='social'))
 ]

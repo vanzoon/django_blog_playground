@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+ 
+{% block title %}
+Subscription on updates - {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'contact_url' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Agreed and subscribe</button>
+</form>
+{% endblock %}
+
