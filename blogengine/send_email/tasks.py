@@ -1,3 +1,5 @@
+from celery.schedules import crontab
+from celery.task import periodic_task
 from django.core.mail import send_mail
 
 from blogengine.celery import app
@@ -16,7 +18,9 @@ def send_notification_email(user_email):
 
     )
 
-# TODO: rewrite with scheduling decorator
+
+# TODO: rewrite with @periodic_task
+# @periodic_task(run_every=(crontab(minute='*/5')), name="send_bullshit_every_5_min")
 @app.task
 def send_bullshit_email():
     for contact in Contact.objects.all():

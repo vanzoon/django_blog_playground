@@ -30,7 +30,7 @@ class PostSerializer(ModelSerializer):
 
 
 class UserPostRelationSerializer(ModelSerializer):
-#    rate = serializers.CharField(source='get_rate_display', read_only=True)
+    #  rate = serializers.CharField(source='get_rate_display', read_only=True)
 
     class Meta:
         model = UserPostRelation

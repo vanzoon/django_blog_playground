@@ -44,6 +44,8 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+
+# some strange decimal rates turned out at admin panel at least...
 class UserPostRelation(models.Model):
     RATE_CHOICES = (
         (1, 'meh'),
@@ -66,13 +68,11 @@ class UserPostRelation(models.Model):
         self.old_rate = self.rate
 
     def save(self, *args, **kwargs):
-        '''
-        creating = not self.pk
+        # creating = not self.pk
         # old_rate = self.rate
+        #
+        # if self.old_rate != self.rate or creating:
 
-
-        if self.old_rate != self.rate or creating:
-        '''
         super().save(*args, **kwargs)
         from api.logic import set_rating
         set_rating(self.post)

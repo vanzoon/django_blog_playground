@@ -4,6 +4,7 @@ from rest_framework import status
 
 from blog.views import *
 
+
 class PostViewsTestCase(TestCase):
     def setUp(self):
         self.user_1 = User.objects.create(username='user_1')
@@ -63,6 +64,6 @@ class PostViewsTestCase(TestCase):
             pass
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
 
+
 class TagViewsTestCase(TestCase):
     pass
-

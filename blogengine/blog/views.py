@@ -3,11 +3,15 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from sqlparse.sql import Where
 
 from .forms import TagForm, PostForm
 from .utils import *
 
-def pagination(objects: 'QuerySet', requested_page, num_on_page=4) -> dict:
+# TODO: optimize queries
+# TODO: optionally rewrite self-made mixins - they are obscure for query optimization
+
+def pagination(objects: 'QuerySet', requested_page, num_on_page=5) -> dict:
     paginator = Paginator(objects, num_on_page)
     page = paginator.get_page(requested_page)
     next_url = ''
@@ -30,13 +34,18 @@ def pagination(objects: 'QuerySet', requested_page, num_on_page=4) -> dict:
 def posts_list(request):
     search_query = request.GET.get('search', '')
     if search_query:
-        posts = Post.objects.filter(Q(title__icontains=search_query)
-                                    | Q(body__icontains=search_query))
+        posts = Post.objects.filter(
+            Q(title__icontains=search_query) | Q(body__icontains=search_query)) \
+            .select_related('author') \
+            .prefetch_related('tags')
     else:
-        posts = Post.objects.all()
+        posts = Post.objects.all() \
+            .select_related('author') \
+            .prefetch_related('tags')
 
-    context = pagination(posts,
-                         requested_page=request.GET.get('page', 1))
+    context = pagination(
+        posts, requested_page=request.GET.get('page', 1)
+    )
     return render(request, 'blog/index.html', context=context)
 
 
@@ -95,5 +104,5 @@ def tags_list(request):
     return render(request, 'blog/tags_list.html', context={'tags': tags})
 
 
-class Favorites():
+class Favorites:
     pass

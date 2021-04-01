@@ -12,8 +12,8 @@ class TagForm(forms.ModelForm):
         model = Tag
         fields = ['title', 'slug']
         widgets = {
-                    'title': forms.TextInput(attrs={'class': 'form-control'}),
-                    'slug': forms.TextInput(attrs={'class': 'form-control'})
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control'})
         }
 
     def clean_slug(self):
@@ -22,8 +22,8 @@ class TagForm(forms.ModelForm):
         if new_slug == 'create':
             raise ValidationError('Slug may not be "Create"')
 
-        if Tag.objects.filter(slug__iexact=new_slug).count():
-            raise ValidationError('slug must be unique')
+        if Tag.objects.filter(slug__icontains=new_slug):
+            raise ValidationError('Slug must be unique')
 
         return new_slug
 
@@ -34,16 +34,16 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'slug', 'body', 'tags']
         widgets = {
-                    'title': forms.TextInput(attrs={'class': 'form-control'}),
-                    'slug': forms.TextInput(attrs={'class': 'form-control'}),
-                    'body': forms.Textarea(attrs={'class': 'form-control'}),
-                    'tags': forms.SelectMultiple(attrs={'class': 'form-control'})
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control'}),
+            'body': forms.Textarea(attrs={'class': 'form-control'}),
+            'tags': forms.SelectMultiple(attrs={'class': 'form-control'})
         }
 
     def clean_slug(self):
         new_slug = self.cleaned_data['slug'].lower()
 
         if new_slug == 'create':
-            raise ValidationError('slug may not be "Create"')
+            raise ValidationError('Slug may not be "Create"')
 
         return new_slug
