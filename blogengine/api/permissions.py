@@ -2,9 +2,6 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsAuthorOrStaffOrReadOnly(BasePermission):
-    """
-    The request is :unauthenticated as a user, or is a read-only request.
-    """
 
     def has_object_permission(self, request, view, obj):
         return bool(

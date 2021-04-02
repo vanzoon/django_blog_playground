@@ -3,6 +3,9 @@ from django.utils import lorem_ipsum
 
 from blog.models import Post
 
+# TODO: refactor using bulk create
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for i in range(10):

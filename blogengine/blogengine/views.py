@@ -3,8 +3,10 @@ from django.views.generic import TemplateView
 
 from blog.models import Post, Tag
 
+# TODO: finish to implement sitemap and robots views
 
-def redirect_to_blog(request):
+
+def redirect_to_blog():
     return redirect('posts_list_url', permanent=True)
 
 

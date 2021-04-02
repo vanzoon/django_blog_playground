@@ -4,6 +4,8 @@ from .models import Contact
 from .forms import ContactForm
 from .tasks import send_notification_email
 
+# TODO: add default contact name after receiving blank field from form
+
 
 class ContactView(CreateView):
     model = Contact
@@ -13,6 +15,5 @@ class ContactView(CreateView):
 
     def form_valid(self, form):
         form.save()
-        # send(form.instance.email)
         send_notification_email.delay(form.instance.email)
         return super().form_valid(form)

@@ -45,7 +45,6 @@ class Post(models.Model):
         return self.title
 
 
-# some strange decimal rates turned out at admin panel at least...
 class UserPostRelation(models.Model):
     RATE_CHOICES = (
         (1, 'meh'),

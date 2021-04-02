@@ -2,6 +2,8 @@ from django.test import TestCase
 
 from blog.forms import *
 
+# TODO: write tests
+
 
 class TagFormTestCase(TestCase):
     def setUp(self) -> None:

@@ -4,6 +4,8 @@ from rest_framework import status
 
 from blog.views import *
 
+# TODO: write tests for tag views
+
 
 class PostViewsTestCase(TestCase):
     def setUp(self):

@@ -20,6 +20,9 @@ from django.conf.urls import url
 from send_email.views import ContactView
 from .views import redirect_to_blog
 
+# TODO: login/logout urls? Generally authorisation forms needed
+
+
 urlpatterns = [
     path('', redirect_to_blog),
     path('admin/', admin.site.urls),

@@ -11,6 +11,7 @@ from .utils import *
 # TODO: optimize queries
 # TODO: optionally rewrite self-made mixins - they are obscure for query optimization
 
+
 def pagination(objects: 'QuerySet', requested_page, num_on_page=5) -> dict:
     paginator = Paginator(objects, num_on_page)
     page = paginator.get_page(requested_page)

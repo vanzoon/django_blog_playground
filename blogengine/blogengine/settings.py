@@ -12,13 +12,13 @@ env = environ.Env()
 environ.Env.read_env()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', cast=str, default='bfityoib4flp')
 
-# TODO: separate development, production and testing settings
+DEBUG = env('DEBUG', cast=bool, default=False)
+CI = env('CI', cast=bool, default=False)
 
-DEBUG = env('DEBUG')
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', cast=str,
+                    default=['127.0.0.1', 'localhost:8000', ])
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'debug_toolbar',
     'rest_framework',
     'social_django',
 
@@ -44,6 +43,10 @@ INSTALLED_APPS = [
     'api',
     'send_email'
 ]
+if DEBUG:
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,9 +56,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 ]
+if DEBUG:
+    MIDDLEWARE += [
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+        'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+    ]
+
 
 ROOT_URLCONF = 'blogengine.urls'
 
@@ -93,17 +100,19 @@ AUTHENTICATION_BACKENDS = (
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+# CSRF_COOKIE_SECURE = True
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DATABASE_NAME'),
-        'USER': env('DATABASE_USER'),
-        'PASSWORD': env('DATABASE_PASSWORD'),
-        'HOST': env('DATABASE_HOST'),
-        'PORT': env('DATABASE_PORT'),
+if env.str('DATABASE_URL', default=''):
+    DATABASES = {
+        'default': env.db(),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR.path('db')('django.sqlite3'),
+        },
+    }
 
 
 REST_FRAMEWORK = {
@@ -150,7 +159,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
 USE_L10N = True
 
 USE_TZ = True
@@ -159,14 +167,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = env('STATIC_URL', default='/static/')
+# STATIC_ROOT = env('STATIC_ROOT')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-'''
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-'''
+MEDIA_URL = env('MEDIA_URL', default='/media/')
+# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # SMTP
 EMAIL_HOST = env('EMAIL_HOST')
@@ -179,12 +186,10 @@ EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 REDIS_HOST = env('REDIS_HOST')
 REDIS_PORT = env('REDIS_PORT')
 
-#CELERY
+# CELERY
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
-CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout' : 3600}
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-
-

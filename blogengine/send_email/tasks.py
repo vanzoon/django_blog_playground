@@ -19,9 +19,7 @@ def send_notification_email(user_email):
     )
 
 
-# TODO: rewrite with @periodic_task
-# @periodic_task(run_every=(crontab(minute='*/5')), name="send_bullshit_every_5_min")
-@app.task
+@periodic_task(run_every=(crontab(minute='*/5')), name="send_bullshit_every_5_min")
 def send_bullshit_email():
     for contact in Contact.objects.all():
         send_mail(
