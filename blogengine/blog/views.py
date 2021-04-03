@@ -1,35 +1,14 @@
 from django.views.generic import View
 from django.db.models import Q
-from django.core.paginator import Paginator
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from sqlparse.sql import Where
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from .forms import TagForm, PostForm
+from .pagination import pagination
 from .utils import *
 
 # TODO: optimize queries
 # TODO: optionally rewrite self-made mixins - they are obscure for query optimization
-
-
-def pagination(objects: 'QuerySet', requested_page, num_on_page=5) -> dict:
-    paginator = Paginator(objects, num_on_page)
-    page = paginator.get_page(requested_page)
-    next_url = ''
-    prev_url = ''
-
-    if page.has_previous():
-        prev_url = f'?page={page.previous_page_number()}'
-
-    if page.has_next():
-        next_url = f'?page={page.next_page_number()}'
-
-    return {
-            'page_object': page,
-            'is_paginated': page.has_other_pages(),
-            'next_url': next_url,
-            'prev_url': prev_url
-    }
 
 
 def posts_list(request):
@@ -55,10 +34,11 @@ class PostDetail(ObjectDetailMixin, View):
     template = 'blog/post_detail.html'
 
 
-class PostCreate(LoginRequiredMixin, ObjectCreateMixin, View):
+class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, ObjectCreateMixin, View):
     form_model = PostForm
     template = 'blog/post_create_form.html'
     raise_exception = True
+    permission_required = 'blog.add_post'
 
 
 class PostUpdate(LoginRequiredMixin, ObjectUpdateMixin, View):
@@ -66,6 +46,7 @@ class PostUpdate(LoginRequiredMixin, ObjectUpdateMixin, View):
     form_model = PostForm
     template = 'blog/post_update_form.html'
     raise_exception = True
+    permission_required = 'blog.update_post'
 
 
 class PostDelete(LoginRequiredMixin, ObjectDetailMixin, View):
@@ -73,6 +54,7 @@ class PostDelete(LoginRequiredMixin, ObjectDetailMixin, View):
     template = 'blog/post_delete_form.html'
     redirect_url = 'posts_list_url'
     raise_exception = True
+    permission_required = 'blog.delete_post'
 
 
 class TagDetail(ObjectDetailMixin, View):
@@ -86,18 +68,20 @@ class TagCreate(LoginRequiredMixin, ObjectCreateMixin, View):
     raise_exception = True
 
 
-class TagUpdate(LoginRequiredMixin, ObjectUpdateMixin, View):
+class TagUpdate(LoginRequiredMixin, PermissionRequiredMixin, ObjectUpdateMixin, View):
     model = Tag
     form_model = TagForm
     template = 'blog/tag_update_form.html'
     raise_exception = True
+    permission_required = 'blog.update_tag'
 
 
-class TagDelete(LoginRequiredMixin, ObjectDeleteMixin, View):
+class TagDelete(LoginRequiredMixin, PermissionRequiredMixin, ObjectDeleteMixin, View):
     model = Tag
     template = 'blog/tag_delete_form.html'
     redirect_url = 'tags_list_url'
     raise_exception = True
+    permission_required = 'blog.delete_tag'
 
 
 def tags_list(request):

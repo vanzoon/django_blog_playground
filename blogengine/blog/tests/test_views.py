@@ -11,6 +11,7 @@ class PostViewsTestCase(TestCase):
     def setUp(self):
         self.user_1 = User.objects.create(username='user_1')
         self.user_2 = User.objects.create(username='user_2')
+
         self.post_1 = Post.objects.create(title='sample cute title',
                                           slug='asbc_dfs 123*/&()%#@!?',
                                           body='cv',
@@ -21,6 +22,7 @@ class PostViewsTestCase(TestCase):
                                           body='asdf bpot',
                                           author=self.user_2,
                                           )
+
         UserPostRelation.objects.create(user=self.user_1, post=self.post_1, like=True)
         UserPostRelation.objects.create(user=self.user_1, post=self.post_1, rate=5)
         UserPostRelation.objects.create(user=self.user_2, post=self.post_2, like=False)
@@ -68,4 +70,23 @@ class PostViewsTestCase(TestCase):
 
 
 class TagViewsTestCase(TestCase):
-    pass
+    def setUp(self) -> None:
+        self.tag_1 = Tag.objects.create()
+        self.tag_2 = Tag.objects.create()
+        self.tag_3 = Tag.objects.create()
+
+        self.post_1 = Post.objects.create(title='sample cute title',
+                                          slug='asbc_dfs 123*/&()%#@!?',
+                                          body='cv',
+                                          author=self.user_1,
+                                          tags=(self.tag_1, self.tag_2)
+                                          )
+        self.post_2 = Post.objects.create(title='sample cuter title',
+                                          slug='asbc)%#@!?',
+                                          body='asdf bpot',
+                                          author=self.user_2,
+                                          tags=(self.tag_2, self.tag_3)
+                                          )
+
+    def test_tag_create(self):
+        pass

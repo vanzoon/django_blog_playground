@@ -1,12 +1,10 @@
 from django.contrib.auth.models import User
-from django.db.models import JSONField, Count, Case, When, Avg
+from django.db.models import Count, Case, When
 from django.test import TestCase
 
 from api.serializers import PostSerializer
 from blog.models import Post, UserPostRelation
 
-
-# TODO: write test for rating field
 
 class PostSerializerTestCase(TestCase):
 
@@ -40,9 +38,7 @@ class PostSerializerTestCase(TestCase):
         posts = Post.objects.all().annotate(
             bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
             likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-            # rating=Avg('userpostrelation__rate')
         ).order_by('id')
-        # yeah, you need to lowercase class field......
         data = PostSerializer(posts, many=True).data
         expected_data = [
             {

@@ -12,7 +12,6 @@ class PostViewersSerializer(ModelSerializer):
 
 
 class PostSerializer(ModelSerializer):
-    # likes_count = serializers.SerializerMethodField()
     pub_date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S', required=False,
                                          read_only=True)
     author = serializers.CharField(source='author.username', default='', read_only=True)
@@ -25,12 +24,9 @@ class PostSerializer(ModelSerializer):
         model = Post
         fields = ('id', 'title', 'body', 'pub_date', 'slug', 'bookmarked_count',
                   'likes_count', 'rating', 'author', 'viewers')
-    # def get_likes_count(self, instance):
-    #     return UserPostRelation.objects.filter(post=instance, like=True).count()
 
 
 class UserPostRelationSerializer(ModelSerializer):
-    #  rate = serializers.CharField(source='get_rate_display', read_only=True)
 
     class Meta:
         model = UserPostRelation

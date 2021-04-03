@@ -64,17 +64,16 @@ class UserPostRelation(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(UserPostRelation, self).__init__(*args, **kwargs)
-        self.old_rate = self.rate
+        self.__old_rate = self.rate
 
     def save(self, *args, **kwargs):
-        # creating = not self.pk
-        # old_rate = self.rate
-        #
-        # if self.old_rate != self.rate or creating:
+        creating = not self.pk
+        super(UserPostRelation, self).save(*args, **kwargs)
+        if self.__old_rate != self.rate or creating:
+            from api.logic import set_rating
+            set_rating(self.post)
+            self.__old_rate = self.rate
 
-        super().save(*args, **kwargs)
-        from api.logic import set_rating
-        set_rating(self.post)
 
 
 class Tag(models.Model):
@@ -94,7 +93,7 @@ class Tag(models.Model):
         return reverse('tag_delete_url', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.pk:
             self.slug = gen_slug(self.title)
         super().save(*args, **kwargs)
 

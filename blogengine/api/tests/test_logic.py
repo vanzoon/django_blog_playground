@@ -3,11 +3,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.test import TestCase
 
-
-from api.logic import set_rating
 from blog.models import Post, UserPostRelation
-
-# TODO: write test for rating field
 
 
 class SetRatingTestCase(TestCase):
@@ -32,13 +28,16 @@ class SetRatingTestCase(TestCase):
         )
 
         UserPostRelation.objects.create(
-            user=self.user_2, post=self.post_1, like=False, rate=1, in_bookmarks=True
+            user=self.user_2, post=self.post_1, rate=1, in_bookmarks=True
         )
         UserPostRelation.objects.create(
-            user=self.user_3, post=self.post_1, like=True, rate=2
+            user=self.user_3, post=self.post_1, rate=2, like=True
+        )
+        self.user_post_1 = UserPostRelation.objects.create(
+            user=self.user_3, post=self.post_1
         )
 
-    def test_rating_is_valid(self):
+    def test_rating_is_valid_without_changes(self):
         self.assertEqual(1.50, self.post_1.rating)
 
     def test_rating_is_valid_after_new_user_rate(self):
@@ -47,8 +46,18 @@ class SetRatingTestCase(TestCase):
         )
         user_post.rate = 5
         user_post.save(update_fields=['rate'])
-        # set_rating(self.post_1)
         self.assertEqual(2.67, round(self.post_1.rating, 2))
 
-    def test_rating_evaluates_only_after_entry_creation_or_update_rate_field(self):
-        pass
+    def test_rating_does_not_evaluate_without_changing_rate_field(self):
+        self.user_post_1.rate = 1
+
+        # instead of creating new signal specifically to set_rating() this testcase
+        # limit oneself to checking indirect sign of executing of this method
+        @receiver(pre_save, sender=Post)
+        def catch_set_rating_execution(sender, **kwargs):
+            raise AssertionError(
+                '''Rate field is not actually changed but set_rating() executed anyway'''
+            )
+
+        self.user_post_1.rate = 1
+        self.user_post_1.save()

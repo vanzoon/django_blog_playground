@@ -8,8 +8,6 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from django.contrib.auth.models import User
-
 from api.serializers import *
 
 
@@ -38,7 +36,6 @@ class PostApiTestCase(APITestCase):
         posts = Post.objects.all().annotate(
             bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
             likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-            # rating=Avg('userpostrelation__rate')
         ).order_by('id')
         serialized_data = PostSerializer(posts, many=True).data
         self.assertEqual(serialized_data, response.data)
@@ -217,7 +214,7 @@ class UserPostRelationTestCase(APITestCase):
     def test_rate_wrong(self):
         url = reverse('userpostrelation-detail', args=(self.post_1.id,))
         data = {
-            "rate": 10,  # does not exist
+            "rate": 10,  # rate 10 does not exist
         }
         json_data = json.dumps(data)
         self.client.force_login(user=self.user_1)

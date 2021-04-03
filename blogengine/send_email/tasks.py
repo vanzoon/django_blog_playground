@@ -21,10 +21,10 @@ def send_notification_email(user_email):
 
 @periodic_task(run_every=(crontab(minute='*/5')), name="send_bullshit_every_5_min")
 def send_bullshit_email():
-    for contact in Contact.objects.all():
+    for contact in Contact.objects.values('name', 'email'):
         send_mail(
             'Это тестовая безобидная рассылочка',
-            'будем дудосить (нет) тебя каждые несколько минут, но недолго..',
+            'будем желать вам доброго дня каждые 5 минут',
             EMAIL_HOST_USER,
             [contact.email],
             fail_silently=False,

@@ -6,7 +6,7 @@ from blog.models import Post, Tag
 # TODO: finish to implement sitemap and robots views
 
 
-def redirect_to_blog():
+def redirect_to_blog(request):
     return redirect('posts_list_url', permanent=True)
 
 
