@@ -50,12 +50,14 @@ if DEBUG:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#     'blogengine.middlewares.CheckUserIsBlockedMiddleware',
 ]
 if DEBUG:
     MIDDLEWARE += [
@@ -168,12 +170,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = env('STATIC_URL', default='/static/')
-# STATIC_ROOT = env('STATIC_ROOT')
+STATIC_ROOT = env('STATIC_ROOT', default=os.path.join(BASE_DIR, 'staticfiles'))
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
 MEDIA_URL = env('MEDIA_URL', default='/media/')
-# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # SMTP
 EMAIL_HOST = env('EMAIL_HOST')

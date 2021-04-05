@@ -1,5 +1,7 @@
+from unittest import mock
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from rest_framework import status
 
 from blog.views import *
@@ -89,4 +91,12 @@ class TagViewsTestCase(TestCase):
                                           )
 
     def test_tag_create(self):
+        factory = RequestFactory()
+        request = factory.get('')
+        request.user = self.user
+        response = TagCreate.as_view()(request, slug='cvrjterot')
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+        self.assertEqual('blog/tag/create/', response.url)
+
+    def test_tag_delete(self):
         pass

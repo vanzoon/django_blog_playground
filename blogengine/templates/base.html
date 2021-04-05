@@ -1,9 +1,9 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet" media="all">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <script crossorigin="anonymous"
@@ -17,50 +17,16 @@
             src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <title>
         {% block title %}
-            blog engine
+            Such a lovely blog...
         {% endblock %}
     </title>
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/blog">Blog</a>
-        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-                class="navbar-toggler"
-                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<body background="{% static 'images/bg.svg' %}">
+{% include 'footer.html' %}
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'posts_list_url' %}">Posts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'tags_list_url' %}">Tags</a>
-                </li>
-
-                <li class="nav-item">
-                    <a aria-disabled="true" class="nav-link disabled" href="#" tabindex="-1">Disabled</a>
-                </li>
-            </ul>
-            <form action="{% url 'posts_list_url' %}" class="form-inline mx-2 my-lg-0">
-                <input aria-label="Search" class="form-control mr-sm-2" name="search" placeholder="Search" type="search">
-                <button class="btn btn-outline-success mx-2 my-sm-0" type="submit">Search</button>
-            </form>
-            {% if not user.is_authenticated %}
-                <a href="/accounts/login" class="btn btn-primary mx-2">Login</a>
-            {% else %}
-                  <span class="navbar-text mx-2">
-                      Hi, {{ user.get_username }}!
-                  </span>
-                <a href="/accounts/logout" class="btn btn-primary mx-2">Logout</a>
-            {% endif %}
-        </div>
-    </nav>
     <div class="container mt-5">
         <div class="row">
             <div class="col-10 offset-md-1">
@@ -70,8 +36,9 @@
             </div>
         </div>
     </div>
+
     {% if request.user.is_authenticated and request.user.is_staff %}
-        <div class="admin-panel align-items-center">
+            <div class="admin-panel align-items-center">
             <a class="btn btn-outline-info" href="/admin">Admin</a>
             {% block admin-panel %}
             {% endblock %}

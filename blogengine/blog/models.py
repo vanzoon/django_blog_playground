@@ -1,5 +1,6 @@
 from time import time
 from django.db import models
+from django.db.models import Q
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -9,6 +10,23 @@ from django.contrib.auth.models import User
 
 def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
+
+
+class PostManager(models.Manager):
+
+    def filter_author_admin(self, **kwargs):
+        kwargs['author'] =  'admin'
+        return super().get_queryset().filter(**kwargs)
+
+    def rating_and_viewers_order_by(self):
+        args = ('rating', 'viewers')
+        return super().get_queryset().order_by(*args)
+
+    def search(self, search_query):
+        return super().get_queryset().filter(
+            Q(title__icontains=search_query) | Q(body__icontains=search_query)) \
+            .select_related('author') \
+            .prefetch_related('tags')
 
 
 class Post(models.Model):
@@ -21,6 +39,9 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     viewers = models.ManyToManyField(User, through='UserPostRelation', related_name='read_posts')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+
+    # objects = models.Manager()
+    # custom_manager = PostManager()
 
     class Meta:
         ordering = ['-pub_date']

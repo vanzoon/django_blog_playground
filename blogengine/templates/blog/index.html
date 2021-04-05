@@ -7,11 +7,10 @@
 {% block content %}
 
     <h1 class="mb-5">Posts</h1>
-    {% for post in page_object.object_list %}
+    {% for post in page_obj.object_list %}
        {% include 'blog/includes/post_card_template.html' %}
     {% endfor %}
 
-   
     {% if is_paginated %}
 
     <nav aria-label="...">
@@ -20,17 +19,18 @@
                 <a aria-disabled="true" class="page-link" href="{{ prev_url }}" tabindex="-1">Previous</a>
             </li>
 
-            {% for n in page_object.paginator.page_range %}
-            {% if page_object.number == n %}
-            <li aria-current="page" class="page-item active">
-                <a class="page-link" href="?page={{ n }}">{{ n }}<span class="sr-only">(current)</span></a>
-            </li>
-            {% elif n > page_object.number|add:-3 and n < page_object.number|add:3 %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ n }}">{{ n }}</a>
-            </li>
-            {% endif %}
+            {% for n in paginator.page_range %}
+                {% if page_obj.number == n %}
+                    <li aria-current="page" class="page-item active">
+                        <a class="page-link" href="?page={{ n }}">{{ n }}<span class="sr-only">(current)</span></a>
+                    </li>
+                {% elif n > page_obj.number|add:-3 and n < page_obj.number|add:3 %}
+                <li class="page-item">
+                        <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+                    </li>
+                {% endif %}
             {% endfor %}
+
             <li class="page-item {% if not next_url %} disabled {% endif %}">
                 <a aria-disabled="true" class="page-link" href="{{ next_url }}" tabindex="-1">Next</a>
             </li>

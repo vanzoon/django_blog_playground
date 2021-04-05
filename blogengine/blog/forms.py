@@ -5,6 +5,8 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from .models import Tag, Post
 
+# TODO: forms are too raw
+
 
 class TagForm(forms.ModelForm):
 
