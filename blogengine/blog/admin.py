@@ -6,7 +6,9 @@ from .models import *
 
 @admin.register(Post)
 class PostAdmin(ModelAdmin):
-    pass
+    def save_model(self, request, obj, form, change):
+        obj.author = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Tag)
@@ -16,4 +18,8 @@ class TagAdmin(ModelAdmin):
 
 @admin.register(UserPostRelation)
 class UserPostRelationAdmin(ModelAdmin):
+    pass
+
+@admin.register(Comment)
+class CommentAdmin(ModelAdmin):
     pass

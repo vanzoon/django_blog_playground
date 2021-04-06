@@ -24,14 +24,13 @@ class PostListView(ListView):
             print(self.request.GET.get('search'))
 
             queryset = self.model.objects.filter(
-                Q(title__icontains=search_query) |
-                Q(body__icontains=search_query)) \
+                Q(title__icontains=search_query) | Q(body__icontains=search_query)) \
                 .select_related('author') \
-                .prefetch_related('tags')
+                .prefetch_related('tags', 'comments')
         else:
             queryset = self.model.objects.all() \
                 .select_related('author') \
-                .prefetch_related('tags')
+                .prefetch_related('tags', 'comments')
 
         ordering = self.get_ordering()
         if ordering:
@@ -53,14 +52,6 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     raise_exception = True
     permission_required = 'blog.add_post'
 
-    def post(self, request, slug):
-        form = self.form_model(request.POST)
-        if form.is_valid():
-            form = form.save(commit=False)
-
-
-
-
 
 class PostUpdate(LoginRequiredMixin, ObjectUpdateMixin, View):
     model = Post
@@ -78,6 +69,10 @@ class PostDelete(LoginRequiredMixin, ObjectDetailMixin, View):
     permission_required = 'blog.delete_post'
 
 
+class TagDetail(ObjectDetailMixin, View):
+    model = Tag
+    template = 'blog/tag_detail.html'
+'''
 class TagDetail(BaseDetailView):
     model = Tag
     template_name = 'blog/tag_detail.html'
@@ -94,6 +89,7 @@ class TagDetail(BaseDetailView):
             'admin_obj': self.object,
         }
         return render(request, self.template_name, context=context)
+'''
 
 
 class TagCreate(LoginRequiredMixin, ObjectCreateMixin, View):

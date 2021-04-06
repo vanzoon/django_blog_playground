@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Tag, Post
+from .models import Tag, Post, Comment
+
 
 # TODO: forms are too raw
 
@@ -49,3 +50,14 @@ class PostForm(forms.ModelForm):
             raise ValidationError('Slug can not be "Create"')
 
         return new_slug
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comment
+        fields = ['name', 'email', 'body']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'body': forms.Textarea(attrs={'class': 'form-control'}),
+        }

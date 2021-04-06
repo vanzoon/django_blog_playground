@@ -1,11 +1,16 @@
 from time import time
 from django.db import models
 from django.db.models import Q
+from django.http import request
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
 from django.contrib.auth.models import User
+
+from blogengine import settings
+
+# TODO: pay attention to slug and cyrillic
 
 
 def gen_slug(s):
@@ -14,9 +19,9 @@ def gen_slug(s):
 
 class PostManager(models.Manager):
 
-    def filter_author_admin(self, **kwargs):
-        kwargs['author'] =  'admin'
-        return super().get_queryset().filter(**kwargs)
+    def filter_current_user(self):
+        # kwargs['author'] =  'admin'
+        return super().get_queryset().filter(author=request.user)
 
     def rating_and_viewers_order_by(self):
         args = ('rating', 'viewers')
@@ -30,15 +35,21 @@ class PostManager(models.Manager):
 
 
 class Post(models.Model):
+    STATUS = (
+        (0, 'Draft'),
+        (1, 'Published')
+    )
+
     title = models.CharField(max_length=150, db_index=True)
     slug = models.SlugField(max_length=150, unique=True, blank=True)
-    body = models.TextField(db_index=True, blank=True)
+    body = models.TextField(db_index=True, verbose_name='Contents', blank=True)
     tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
+    status = models.PositiveSmallIntegerField(choices=STATUS, default=0)
     pub_date = models.DateTimeField(auto_now_add=True)
     last_modify_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     viewers = models.ManyToManyField(User, through='UserPostRelation', related_name='read_posts')
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True, blank=True)
 
     # objects = models.Manager()
     # custom_manager = PostManager()
@@ -60,6 +71,7 @@ class Post(models.Model):
             self.slug = f'{gen_slug(self.title)}-{int(time())}'
         else:
             self.last_modify_date = timezone.now()
+        # self.author = self.request.user
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -95,6 +107,20 @@ class UserPostRelation(models.Model):
             set_rating(self.post)
             self.__old_rate = self.rate
 
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+    body = models.TextField(max_length=500)
+    pub_date = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField()
+
+    class Meta:
+        ordering = ['pub_date']
+
+    def __str__(self):
+        return f"Comment by {self.name}: {self.body[100]}"
 
 
 class Tag(models.Model):

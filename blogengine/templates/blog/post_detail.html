@@ -5,28 +5,65 @@
 {% endblock %}
 
 {% block content %}
-<div>
-    <h1 class="mt-5">
-         {{ post.title }}
-    </h1>
-    <h2 class="mb-5">
-        Author: {{ post.author }}
-    </h2>
+<div class="container">
+     <div class="card-footer">
+         <h1>{{ post.title }}</h1>
+         <p>Author: {{ post.author }} | Published: {{ post.last_modify_date }}</p>
+         {% if user.is_authenticated and user.get_username == post.author.username %}
+             <a href="{{ post.get_update_url }}">edit</a>
+             <a href="{{ post.get_delete_url }}">delete</a>
+         {% endif %}
 
-    {% if user.is_authenticated and user.get_username == post.author.username %}
-        <a href="{{ post.get_update_url }}">edit</a>
-        <a href="{{ post.get_delete_url }}">delete</a>
-    {% endif %}
-</div>
-     <p>
-         {{ post.body }}
-     </p>
-<div>
-    <h2>
-        Rating {{ post.rating }}
-    </h2>
-    <h2>
-        Likes {{ post.likes_count }}
-    </h2>
+     </div>
+     <div class="card-body">
+         <p>
+             {{ post.body }}
+         </p>
+
+     </div>
+     <div class="card-footer">
+         <h4>
+             Rating: {{ post.rating }}
+         </h4>
+         <h4>
+         Likes: {{ post.likes_count }}
+         </h4>
+     </div>
+
+    {# TODO: complete comments section & check django-crispy-forms #}
+
+    {% for comment in comments %}
+     <div class="card-body">
+        {% if new_comment %}
+        <div class="alert alert-success" role="alert">
+          Your comment is awaiting moderation
+        </div>
+        {% else %}
+        <h3>Leave a comment</h3>
+        <form method="post" style="margin-top: 1.3em;">
+          {{ comment_form.as_p }}
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+        </form>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+     <div class="card-body">
+        {% if new_comment %}
+        <div class="alert alert-success" role="alert">
+          Your comment is awaiting moderation
+        </div>
+        {% else %}
+        <h3>Leave a comment</h3>
+        <form method="post" style="margin-top: 1.3em;">
+            {% csrf_token %}
+              {{ comment_form.as_p }}
+          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+        </form>
+        {% endif %}
+      </div>
+
 </div>
 {% endblock %}

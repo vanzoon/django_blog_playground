@@ -24,15 +24,19 @@
     </title>
 </head>
 
-<body background="{% static 'images/bg.svg' %}">
+<body>
+<!--<body background="{% static 'images/bg.svg' %}">-->
 {% include 'footer.html' %}
 
     <div class="container mt-5">
         <div class="row">
-            <div class="col-10 offset-md-1">
+            <div class="col-9">
                 {% block content %}
                     There is no content for you
                 {% endblock %}
+            </div>
+            <div class="col-3">
+                {% include 'about.html' %}
             </div>
         </div>
     </div>
