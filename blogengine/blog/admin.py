@@ -22,4 +22,9 @@ class UserPostRelationAdmin(ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(ModelAdmin):
-    pass
+    search_fields = ('name', 'email', 'body')
+    list_filter = ('active', 'pub_date')
+    actions = ['approve_comments']
+
+    def approve_comments(self, request, queryset):
+        queryset.update(active=True)

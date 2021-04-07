@@ -1,7 +1,6 @@
 from time import time
 from django.db import models
 from django.db.models import Q
-from django.http import request
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -17,21 +16,43 @@ def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
 
 
+class PostQuerySet(models.QuerySet):
+
+    def get_queryset(self):
+        return super().select_related('author').prefetch_related('tags')
+
+    def filter_author_admin(self):
+        return self.filter(author='admin')
+
+    def order_by_rating_and_viewers(self):
+        args = ('rating', 'viewers')
+        return self.order_by(*args)
+    
+    def search(self, search_query):
+        return self.filter(
+            Q(title__icontains=search_query) | Q(body__icontains=search_query)
+        ).select_related('author').prefetch_related('tags')
+
+
 class PostManager(models.Manager):
 
-    def filter_current_user(self):
-        # kwargs['author'] =  'admin'
-        return super().get_queryset().filter(author=request.user)
+    def get_queryset(self):
+        return PostQuerySet(self.model, using=self._db)
 
-    def rating_and_viewers_order_by(self):
-        args = ('rating', 'viewers')
-        return super().get_queryset().order_by(*args)
+    def filter_author_admin(self):
+        return self.get_queryset().filter_author_admin()
+
+    def order_by_rating_and_viewers(self):
+        return self.get_queryset().order_by_rating_and_viewers()
 
     def search(self, search_query):
-        return super().get_queryset().filter(
-            Q(title__icontains=search_query) | Q(body__icontains=search_query)) \
-            .select_related('author') \
-            .prefetch_related('tags')
+        return self.get_queryset().search(search_query)
+
+
+class CommentManager(models.Manager):
+
+    def comments_for_post(self, post):
+        return super(CommentManager, self).filter(post=post, active=True)
 
 
 class Post(models.Model):
@@ -51,8 +72,7 @@ class Post(models.Model):
     viewers = models.ManyToManyField(User, through='UserPostRelation', related_name='read_posts')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True, blank=True)
 
-    # objects = models.Manager()
-    # custom_manager = PostManager()
+    objects = PostManager()
 
     class Meta:
         ordering = ['-pub_date']
@@ -74,6 +94,10 @@ class Post(models.Model):
         # self.author = self.request.user
         super().save(*args, **kwargs)
 
+    @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post=self).count()
+
     def __str__(self):
         return self.title
 
@@ -93,7 +117,7 @@ class UserPostRelation(models.Model):
     rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
 
     def __str__(self):
-        return f'{self.user}, post: {self.post.title}, rated as {self.rate}'
+        return f'{self.user}, post: {self.post}, rated as {self.rate}'
 
     def __init__(self, *args, **kwargs):
         super(UserPostRelation, self).__init__(*args, **kwargs)
@@ -109,18 +133,21 @@ class UserPostRelation(models.Model):
 
 
 class Comment(models.Model):
+
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     name = models.CharField(max_length=50)
     email = models.EmailField()
     body = models.TextField(max_length=500)
     pub_date = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField()
+    active = models.BooleanField(default=False)
+
+    objects = CommentManager()
 
     class Meta:
         ordering = ['pub_date']
 
     def __str__(self):
-        return f"Comment by {self.name}: {self.body[100]}"
+        return f"Comment by {self.name}: {self.body}"
 
 
 class Tag(models.Model):

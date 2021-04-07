@@ -1,123 +1,118 @@
-from django.http import Http404
-from django.views.generic import View, ListView, DetailView, CreateView
-from django.db.models import Q
+from django.views import generic
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic.detail import BaseDetailView
 
-from .forms import TagForm, PostForm
-from .pagination import pagination
-from .utils import *
+from .forms import TagForm, PostForm, CommentForm
+from .models import Post, Tag, Comment
 
-# TODO: optimize queries
-# TODO: optionally rewrite self-made mixins - they are obscure for query optimization
+# TODO: check queries for optimization (similar queries in PostDetail,
+#  unnecessary in TagDetail)
+# TODO: implement view for comments too..
 
 
-class PostListView(ListView):
+class PostListView(generic.ListView):
     model = Post
     paginate_by = 4
-    template_name = 'blog/index.html'
+    context_object_name = 'posts'
+    template_name = 'blog/posts_list.html'
 
     def get_queryset(self):
         search_query = self.request.GET.get('search')
         if search_query:
-            print(self.request.GET.get('search'))
-
-            queryset = self.model.objects.filter(
-                Q(title__icontains=search_query) | Q(body__icontains=search_query)) \
-                .select_related('author') \
-                .prefetch_related('tags', 'comments')
+            queryset = self.model.objects.search(search_query)
         else:
-            queryset = self.model.objects.all() \
-                .select_related('author') \
-                .prefetch_related('tags', 'comments')
-
-        ordering = self.get_ordering()
-        if ordering:
-            if isinstance(ordering, str):
-                ordering = (ordering,)
-            queryset = queryset.order_by(*ordering)
-
+            queryset = self.model.objects.get_queryset()
         return queryset
 
 
-class PostDetail(ObjectDetailMixin, View):
+class PostDetailView(generic.DetailView):
     model = Post
-    template = 'blog/post_detail.html'
+    # form_class = CommentForm
+    template_name = 'blog/post_detail.html'
+    # success_url = 'post_detail_url'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostDetailView, self).get_context_data(**kwargs)
+        context.update({
+            'comments': Comment.objects.comments_for_post(self.object),
+            # 'comment_form': CommentForm(initial={'post': self.object})
+            # 'new_comment': True,
+        })
+        return context
+
+# class CommentFormView(B, generic.FormView):
+#     model = Comment
+#     form_class = CommentForm
+#     template_name = 'blog/post_detail.html'
+#
+# #
+#     def post(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         new_comment = self.get_form()
+#
+#         if new_comment.is_valid():
+#             new_comment.save()
+#             return self.form_valid(new_comment)
+#         else:
+#             return self.form_invalid(new_comment)
+#         #
+        # kwargs.update({
+        #     'new_comment': new_comment
+        # })
+        # return self.get(self, request, *args, **kwargs)
+        # return super(CommentFormView, self).post(request, *args, **kwargs)
 
 
-class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    form_model = PostForm
-    template = 'blog/post_create_form.html'
-    raise_exception = True
+class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_create_form.html'
     permission_required = 'blog.add_post'
 
 
-class PostUpdate(LoginRequiredMixin, ObjectUpdateMixin, View):
+class PostUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Post
-    form_model = PostForm
-    template = 'blog/post_update_form.html'
-    raise_exception = True
+    form_class = PostForm
+    template_name = 'blog/post_update_form.html'
     permission_required = 'blog.update_post'
 
 
-class PostDelete(LoginRequiredMixin, ObjectDetailMixin, View):
+class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Post
-    template = 'blog/post_delete_form.html'
-    redirect_url = 'posts_list_url'
-    raise_exception = True
+    template_name = 'blog/post_delete_form.html'
+    success_url = 'posts_list_url'
     permission_required = 'blog.delete_post'
 
 
-class TagDetail(ObjectDetailMixin, View):
-    model = Tag
-    template = 'blog/tag_detail.html'
-'''
-class TagDetail(BaseDetailView):
+class TagDetailView(generic.DetailView):
     model = Tag
     template_name = 'blog/tag_detail.html'
 
-    def get(self, request, slug):
-        self.object = None
-        try:
-            self.object = self.model.objects.get(slug__iexact=slug)
-        except self.model.DoesNotExist:
-            raise Http404(f'No {self.model.__name__} matches the given query.')
 
-        context = {
-            self.model.__name__.lower(): self.object,
-            'admin_obj': self.object,
-        }
-        return render(request, self.template_name, context=context)
-'''
+class TagCreateView(LoginRequiredMixin, generic.CreateView):
+    form_class = TagForm
+    template_name = 'blog/tag_create.html'
 
 
-class TagCreate(LoginRequiredMixin, ObjectCreateMixin, View):
-    form_model = TagForm
-    template = 'blog/tag_create.html'
-    raise_exception = True
-
-
-class TagUpdate(LoginRequiredMixin, PermissionRequiredMixin, ObjectUpdateMixin, View):
+class TagUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
     model = Tag
-    form_model = TagForm
-    template = 'blog/tag_update_form.html'
-    raise_exception = True
+    form_class = TagForm
+    template_name = 'blog/tag_update_form.html'
     permission_required = 'blog.update_tag'
 
 
-class TagDelete(LoginRequiredMixin, PermissionRequiredMixin, ObjectDeleteMixin, View):
+class TagDeleteView(LoginRequiredMixin, PermissionRequiredMixin, generic.DeleteView):
     model = Tag
-    template = 'blog/tag_delete_form.html'
-    redirect_url = 'tags_list_url'
-    raise_exception = True
+    success_url = 'tags_list_url'
+    template_name = 'blog/tag_delete_form.html'
     permission_required = 'blog.delete_tag'
 
 
-def tags_list(request):
-    tags = Tag.objects.all()
-    return render(request, 'blog/tags_list.html', context={'tags': tags})
+class TagsListView(generic.ListView):
+    model = Tag
+    context_object_name = 'tags'
+    template_name = 'blog/tags_list.html'
 
 
-class Favorites:
+class FavoritesView:
     pass

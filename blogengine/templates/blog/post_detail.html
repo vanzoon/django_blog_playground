@@ -6,62 +6,63 @@
 
 {% block content %}
 <div class="container">
+
      <div class="card-footer">
-         <h1>{{ post.title }}</h1>
-         <p>Author: {{ post.author }} | Published: {{ post.last_modify_date }}</p>
+         <h1>
+             {{ post.title }}
+         </h1>
+         <p>Author: {{ post.author.username }} | Published: {{ post.pub_date }}
+         {% if post.last_modify_date != NULL %} | Edited: {{ post.last_modify_date }} {% endif %}</p>
+
          {% if user.is_authenticated and user.get_username == post.author.username %}
              <a href="{{ post.get_update_url }}">edit</a>
              <a href="{{ post.get_delete_url }}">delete</a>
          {% endif %}
 
      </div>
+
      <div class="card-body">
          <p>
              {{ post.body }}
          </p>
-
      </div>
+
      <div class="card-footer">
          <h4>
              Rating: {{ post.rating }}
          </h4>
          <h4>
-         Likes: {{ post.likes_count }}
+             Likes: {{ post.likes_count }}
          </h4>
      </div>
 
-    {# TODO: complete comments section & check django-crispy-forms #}
 
     {% for comment in comments %}
-     <div class="card-body">
-        {% if new_comment %}
-        <div class="alert alert-success" role="alert">
-          Your comment is awaiting moderation
+        <div class="comments" style="padding: 10px;">
+            <p class="font-weight-bold">
+                {{ comment.name }}
+            <span class="text-muted font-weight-normal">
+                  {{ comment.pub_date }}
+            </span>
+            </p>
+                {{ comment.body | linebreaks }}
         </div>
-        {% else %}
-        <h3>Leave a comment</h3>
-        <form method="post" style="margin-top: 1.3em;">
-          {{ comment_form.as_p }}
-          {% csrf_token %}
-          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
-        </form>
-        {% endif %}
-      </div>
-
-    </div>
     {% endfor %}
+
+    {# TODO: complete comments section & check django-crispy-forms #}
+
      <div class="card-body">
         {% if new_comment %}
-        <div class="alert alert-success" role="alert">
-          Your comment is awaiting moderation
-        </div>
+            <div class="alert alert-success" role="alert">
+                Your comment is awaiting moderation
+            </div>
         {% else %}
-        <h3>Leave a comment</h3>
-        <form method="post" style="margin-top: 1.3em;">
-            {% csrf_token %}
-              {{ comment_form.as_p }}
-          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
-        </form>
+            <h3>Leave a comment</h3>
+            <form method="post" style="margin-top: 1.3em;">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+            <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+            </form>
         {% endif %}
       </div>
 
