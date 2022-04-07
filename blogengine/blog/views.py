@@ -2,7 +2,7 @@ from django.views import generic
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
-from .forms import TagForm, PostForm, CommentForm
+from .forms import TagForm, PostForm  # CommentForm
 from .models import Post, Tag, Comment
 
 # TODO: check queries for optimization (similar queries in PostDetail,
@@ -51,8 +51,9 @@ class PostDetailView(generic.DetailView):
 #         new_comment = self.get_form()
 #
 #         if new_comment.is_valid():
+#             new_comment.save(commit=False)
+#             new_comment.post = self.post
 #             new_comment.save()
-#             return self.form_valid(new_comment)
 #         else:
 #             return self.form_invalid(new_comment)
 #         #

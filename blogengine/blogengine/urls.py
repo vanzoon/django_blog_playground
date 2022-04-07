@@ -1,7 +1,6 @@
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls import url
+from django.urls import path, include, re_path
 
 from . import settings
 from .views import redirect_to_blog, RobotsTxtView
@@ -18,7 +17,7 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('contact/', ContactView.as_view(), name='contact'),
     path('robots.txt', RobotsTxtView.as_view()),
-    url('', include('social_django.urls', namespace='social'))
+    re_path('', include('social_django.urls', namespace='social'))
 ]
 
 if settings.DEBUG:

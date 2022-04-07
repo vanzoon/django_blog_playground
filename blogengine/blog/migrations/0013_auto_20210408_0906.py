@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='post',
-            name='status',
-            field=models.PositiveSmallIntegerField(choices=[(0, 'Draft'), (1, 'Published')], default=0),
-        ),
         migrations.AlterField(
             model_name='post',
             name='rating',

@@ -1,5 +1,3 @@
-from unittest import mock
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase, RequestFactory
 from rest_framework import status

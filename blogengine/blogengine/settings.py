@@ -1,15 +1,11 @@
-import os
 import environ
+import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
 env = environ.Env()
-environ.Env.read_env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', cast=str, default='bfityoib4flp')
@@ -24,6 +20,7 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'blogengine.settings'
 DJANGO_SETTINGS_MODULE = env('DJANGO_SETTINGS_MODULE')
 
 # Application definition
@@ -41,7 +38,7 @@ INSTALLED_APPS = [
 
     'blog',
     'api',
-    'send_email'
+    'send_email',
 ]
 if DEBUG:
     INSTALLED_APPS += [
@@ -101,7 +98,7 @@ AUTHENTICATION_BACKENDS = (
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 # CSRF_COOKIE_SECURE = True
 
 if env.str('DATABASE_URL', default=''):
@@ -115,6 +112,7 @@ else:
             'NAME': BASE_DIR.path('db')('django.sqlite3'),
         },
     }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 REST_FRAMEWORK = {

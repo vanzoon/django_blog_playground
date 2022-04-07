@@ -16,19 +16,4 @@ class Migration(migrations.Migration):
             name='body',
             field=models.TextField(blank=True, db_index=True, verbose_name='Contents'),
         ),
-        migrations.CreateModel(
-            name='Comment',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('email', models.EmailField(max_length=254)),
-                ('body', models.TextField(max_length=500)),
-                ('pub_date', models.DateTimeField(auto_now_add=True)),
-                ('active', models.BooleanField()),
-                ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='blog.post')),
-            ],
-            options={
-                'ordering': ['pub_date'],
-            },
-        ),
     ]
