@@ -1,10 +1,20 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 
-from .models import Tag, Post, Comment
+from .models import Tag, Post, Comment, CustomUser
 
 
 # TODO: forms are too raw
+
+class CustomUserCreationForm(UserCreationForm):
+    model = CustomUser
+    fields = ['email', 'username']
+
+
+class CustomUserChangeForm(UserChangeForm):
+    model = CustomUser
+    fields = ['email', 'username']
 
 
 class TagForm(forms.ModelForm):

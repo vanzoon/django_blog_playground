@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.views import generic
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -8,6 +9,12 @@ from .models import Post, Tag, Comment
 # TODO: check queries for optimization (similar queries in PostDetail,
 #  unnecessary in TagDetail)
 # TODO: implement view for comments too..
+
+
+class ProfileView(generic.TemplateView):
+    model = User
+    context_object_name = 'user'
+    template_name = 'registration/profile.html'
 
 
 class PostListView(generic.ListView):
@@ -113,7 +120,6 @@ class TagsListView(generic.ListView):
     model = Tag
     context_object_name = 'tags'
     template_name = 'blog/tags_list.html'
-
 
 class FavoritesView:
     pass

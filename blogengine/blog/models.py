@@ -5,7 +5,7 @@ from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 from blogengine import settings
 
@@ -14,6 +14,16 @@ from blogengine import settings
 
 def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
+
+
+class CustomUser(AbstractUser):
+    age = models.PositiveIntegerField(default=None, null=True, blank=True)
+
+    class Meta:
+        db_table = 'auth_user'
+
+    def __str__(self):
+        return self.username
 
 
 class PostQuerySet(models.QuerySet):
@@ -69,7 +79,7 @@ class Post(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     last_modify_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    viewers = models.ManyToManyField(User, through='UserPostRelation', related_name='read_posts')
+    viewers = models.ManyToManyField(settings.AUTH_USER_MODEL, through='UserPostRelation', related_name='read_posts')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True, blank=True)
 
     objects = PostManager()
@@ -110,7 +120,7 @@ class UserPostRelation(models.Model):
         (4, 'good'),
         (5, 'amazing')
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     like = models.BooleanField(default=False)
     in_bookmarks = models.BooleanField(default=False)

@@ -8,6 +8,7 @@ Logout - {{ block.super }}
 {% block content %}
 <div class="container" id="logout">
     <p>Logged out!</p>
+      <a href="{% url 'login'%}">Click here to login again.</a>
     <a href="{% url "social:begin" "github" %}">login with Github</a>
 </div>
 {% endblock %}

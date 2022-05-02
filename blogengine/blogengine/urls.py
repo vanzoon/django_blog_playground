@@ -2,6 +2,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
 
+from blog.views import ProfileView
 from . import settings
 from .views import redirect_to_blog, RobotsTxtView
 from send_email.views import ContactView
@@ -14,6 +15,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/profile/', ProfileView.as_view(), name='profile'),
     path('blog/', include('blog.urls')),
     path('contact/', ContactView.as_view(), name='contact'),
     path('robots.txt', RobotsTxtView.as_view()),
