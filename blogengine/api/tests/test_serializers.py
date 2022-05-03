@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
 from django.db.models import Count, Case, When
 from django.test import TestCase
 
 from api.serializers import PostSerializer
 from blog.models import Post, UserPostRelation
+from users.models import User
 
 
 class PostSerializerTestCase(TestCase):

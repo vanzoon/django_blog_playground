@@ -36,12 +36,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'social_django',
 
+    'users',
     'blog',
     'api',
     'send_email',
 ]
 
-AUTH_USER_MODEL = "blog.CustomUser"
+AUTH_USER_MODEL = "users.User"
 
 if DEBUG:
     INSTALLED_APPS += [
@@ -91,8 +92,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blogengine.wsgi.application'
 
-AUTH_USER_MODEL = 'auth.User'
 AUTHENTICATION_BACKENDS = (
+        # 'utils.custom_authentication.CustomBackend',
         'django.contrib.auth.backends.ModelBackend',
         'social_core.backends.github.GithubOAuth2',
 )

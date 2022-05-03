@@ -5,7 +5,6 @@ from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from django.contrib.auth.models import AbstractUser
 
 from blogengine import settings
 
@@ -14,16 +13,6 @@ from blogengine import settings
 
 def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
-
-
-class CustomUser(AbstractUser):
-    age = models.PositiveIntegerField(default=None, null=True, blank=True)
-
-    class Meta:
-        db_table = 'auth_user'
-
-    def __str__(self):
-        return self.username
 
 
 class PostQuerySet(models.QuerySet):

@@ -20,6 +20,7 @@ class ObjectCreateMixin:
     form_model = None
     template = None
 
+    from django.contrib.auth.models import User
     def get(self, request):
         form = self.form_model()
         return render(request, self.template, context={'form': form})

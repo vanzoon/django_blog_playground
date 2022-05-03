@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.test import TestCase
 
 from blog.models import Post, UserPostRelation
+from users.models import User
 
 
 class SetRatingTestCase(TestCase):

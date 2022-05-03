@@ -1,8 +1,11 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase, RequestFactory
+from django.urls import reverse
 from rest_framework import status
 
+from blog.models import UserPostRelation
 from blog.views import *
+from users.models import User
 
 # TODO: write tests for tag views
 

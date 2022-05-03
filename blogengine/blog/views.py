@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.views import generic
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -12,7 +12,7 @@ from .models import Post, Tag, Comment
 
 
 class ProfileView(generic.TemplateView):
-    model = User
+    model = get_user_model()
     context_object_name = 'user'
     template_name = 'registration/profile.html'
 
