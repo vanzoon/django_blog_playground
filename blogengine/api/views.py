@@ -19,6 +19,7 @@ class PostViewSet(ModelViewSet):
         likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
     ).select_related('author').prefetch_related('viewers')
     serializer_class = PostSerializer
+
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['title', 'body']

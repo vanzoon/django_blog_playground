@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'social_django',
+    'crispy_forms',
 
     'users',
     'blog',
@@ -89,6 +90,8 @@ TEMPLATES = [
         },
     },
 ]
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 WSGI_APPLICATION = 'blogengine.wsgi.application'
 

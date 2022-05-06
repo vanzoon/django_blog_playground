@@ -1,14 +1,21 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from blog.models import Post, UserPostRelation
+from blog.models import Post, UserPostRelation, Comment
 from users.models import User
+
 
 
 class PostViewersSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('first_name', 'last_name')
+
+
+class PostCommentsSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('post', 'name', 'email', 'body', 'active')
 
 
 class PostSerializer(ModelSerializer):
@@ -19,11 +26,12 @@ class PostSerializer(ModelSerializer):
     likes_count = serializers.IntegerField(read_only=True)
     rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
     viewers = PostViewersSerializer(many=True, read_only=True)
+    comments = PostCommentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
         fields = ('id', 'title', 'body', 'pub_date', 'slug', 'bookmarked_count',
-                  'likes_count', 'rating', 'author', 'viewers')
+                  'likes_count', 'rating', 'author', 'viewers', 'comments')
 
 
 class UserPostRelationSerializer(ModelSerializer):

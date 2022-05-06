@@ -1,14 +1,17 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Count, When
 from django.views import generic
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from pycparser.c_ast import Case
 
-from .forms import TagForm, PostForm  # CommentForm
+from .forms import TagForm, PostForm, CommentForm
 from .models import Post, Tag, Comment
 
 # TODO: check queries for optimization (similar queries in PostDetail,
 #  unnecessary in TagDetail)
 # TODO: implement view for comments too..
+# NOTE: that is happening with permissions here...
 
 
 class ProfileView(generic.TemplateView):
@@ -28,7 +31,7 @@ class PostListView(generic.ListView):
         if search_query:
             queryset = self.model.objects.search(search_query)
         else:
-            queryset = self.model.objects.get_queryset()
+            queryset = self.model.objects.get_published()
         return queryset
 
 
@@ -38,37 +41,29 @@ class PostDetailView(generic.DetailView):
     template_name = 'blog/post_detail.html'
     # success_url = 'post_detail_url'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    # def get_queryset(self):
+    #     queryset = super(PostDetailView, self).get_queryset().annotate(
+    #         bookmarked=Count(Case(When(userpostrelation__in_bookmarks=True, then=1)))
+    #     )
+    #     return queryset
+
+    def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context.update({
             'comments': Comment.objects.comments_for_post(self.object),
-            # 'comment_form': CommentForm(initial={'post': self.object})
-            # 'new_comment': True,
         })
+        if self.request.user.is_authenticated:
+            context.update({
+                'comment_form': CommentForm(instance=self.request.user),
+                'new_comment': True,
+            })
         return context
 
-# class CommentFormView(B, generic.FormView):
-#     model = Comment
-#     form_class = CommentForm
-#     template_name = 'blog/post_detail.html'
-#
-# #
-#     def post(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         new_comment = self.get_form()
-#
-#         if new_comment.is_valid():
-#             new_comment.save(commit=False)
-#             new_comment.post = self.post
-#             new_comment.save()
-#         else:
-#             return self.form_invalid(new_comment)
-#         #
-        # kwargs.update({
-        #     'new_comment': new_comment
-        # })
-        # return self.get(self, request, *args, **kwargs)
-        # return super(CommentFormView, self).post(request, *args, **kwargs)
+
+class CommentFormView(generic.FormView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/post_detail.html'
 
 
 class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.CreateView):
@@ -78,11 +73,25 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
     permission_required = 'blog.add_post'
 
 
-class PostUpdateView(LoginRequiredMixin, generic.UpdateView):
+# ... maybe it would be better to implement in get_from_kwargs?
+    def post(self, request, *args, **kwargs):
+        request.POST = request.POST.copy()
+        if 'publish' in request.POST:
+            request.POST['status'] = 1
+        if 'draft' in request.POST:
+            request.POST['status'] = 0
+        return super(PostCreateView, self).post(request, *kwargs)
+
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_update_form.html'
     permission_required = 'blog.update_post'
+
+    def test_func(self):
+        obj = self.get_object()
+        return obj.author == self.request.user
 
 
 class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -107,6 +116,7 @@ class TagUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateV
     form_class = TagForm
     template_name = 'blog/tag_update_form.html'
     permission_required = 'blog.update_tag'
+    raise_exception = True
 
 
 class TagDeleteView(LoginRequiredMixin, PermissionRequiredMixin, generic.DeleteView):

@@ -1,4 +1,5 @@
 {% extends 'blog/base_blog.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}
      {{ post.title }} - {{ block.super }}
@@ -6,19 +7,28 @@
 
 {% block content %}
 <div class="container">
+    <div class="card text-dark bg-light mb-4">
 
-     <div class="card-footer">
-         <h1>
-             {{ post.title }}
-         </h1>
-         <p>Author: {{ post.author.username }} | Published: {{ post.pub_date }}
-         {% if post.last_modify_date != NULL %} | Edited: {{ post.last_modify_date }} {% endif %}</p>
+     <div class="card-header ">
+         <h1 class="card-title text-center"> {{ post.title }} </h1>
+         <p class="text-left">
+         Author: {{ post.author.username }}
+         {% if post.pub_date is not None %}
+             | Published: {{ post.pub_date }}
+         {% else %}
+             | Draft version
+         {% endif %}
+        | Edited last time: {{ post.last_modify_date }}
+         </p>
+
+         {# Move logic out of template #}
 
          {% if user.is_authenticated and user.get_username == post.author.username %}
-             <a href="{{ post.get_update_url }}">edit</a>
-             <a href="{{ post.get_delete_url }}">delete</a>
+         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+             <a class="btn btn-info btn-lg me-md-2" href="{{ post.get_update_url }}">edit</a>
+             <a class="btn btn-danger btn-lg " href="{{ post.get_delete_url }}">delete</a>
+         </div>
          {% endif %}
-
      </div>
 
      <div class="card-body">
@@ -29,42 +39,41 @@
 
      <div class="card-footer">
          <h4>
-             Rating: {{ post.rating }}
+             Rating: {{ post.rating_value }}
          </h4>
          <h4>
-             Likes: {{ post.likes_count }}
+             Likes: {{ post.likes }}
          </h4>
      </div>
 
+    </div>
+
 
     {% for comment in comments %}
-        <div class="comments" style="padding: 10px;">
-            <p class="font-weight-bold">
+        <div class="card">
+            <p class="card-footer font-weight-bold">
                 {{ comment.name }}
-            <span class="text-muted font-weight-normal">
+            <span class="text-muted font-weight-normal text-end">
                   {{ comment.pub_date }}
             </span>
             </p>
+            <div class="card-body">
                 {{ comment.body | linebreaks }}
+            </div>
         </div>
     {% endfor %}
 
-    {# TODO: complete comments section & check django-crispy-forms #}
 
+    {% if new_comment %}
      <div class="card-body">
-        {% if new_comment %}
-            <div class="alert alert-success" role="alert">
-                Your comment is awaiting moderation
-            </div>
-        {% else %}
             <h3>Leave a comment</h3>
             <form method="post" style="margin-top: 1.3em;">
                 {% csrf_token %}
-                {{ comment_form.as_p }}
-            <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+                {{ comment_form | crispy }}
+            <button type="submit" class="btn btn-primary btn-lg">Send</button>
             </form>
-        {% endif %}
       </div>
+    {% endif %}
 
 </div>
 {% endblock %}

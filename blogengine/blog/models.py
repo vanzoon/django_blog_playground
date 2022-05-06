@@ -1,15 +1,14 @@
 from time import time
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count, When
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
-
+from pycparser.c_ast import Case
 
 from blogengine import settings
 
 # TODO: pay attention to slug and cyrillic
-
 
 def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
@@ -19,6 +18,13 @@ class PostQuerySet(models.QuerySet):
 
     def get_queryset(self):
         return super().select_related('author').prefetch_related('tags')
+    
+    # def get_detailed_queryset(self):
+    #    return self.get_queryset().annotate(
+    #        likes=Count(Case(When(userpostrelation__like=True, then=1)))
+    #    )
+    def get_published(self):
+        return super().filter(status=1)
 
     def filter_author_admin(self):
         return self.filter(author='admin')
@@ -38,6 +44,9 @@ class PostManager(models.Manager):
     def get_queryset(self):
         return PostQuerySet(self.model, using=self._db)
 
+    def get_published(self):
+        return self.get_queryset().get_published()
+
     def filter_author_admin(self):
         return self.get_queryset().filter_author_admin()
 
@@ -55,6 +64,7 @@ class CommentManager(models.Manager):
 
 
 class Post(models.Model):
+
     STATUS = (
         (0, 'Draft'),
         (1, 'Published')
@@ -65,8 +75,8 @@ class Post(models.Model):
     body = models.TextField(db_index=True, verbose_name='Contents', blank=True)
     tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
     status = models.PositiveSmallIntegerField(choices=STATUS, default=0)
-    pub_date = models.DateTimeField(auto_now_add=True)
-    last_modify_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    pub_date = models.DateTimeField(default=None, null=True, blank=True)
+    last_modify_date = models.DateTimeField(auto_now=True, null=False, blank=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     viewers = models.ManyToManyField(settings.AUTH_USER_MODEL, through='UserPostRelation', related_name='read_posts')
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=None, null=True, blank=True)
@@ -88,14 +98,30 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             self.slug = f'{gen_slug(self.title)}-{int(time())}'
-        else:
-            self.last_modify_date = timezone.now()
-        # self.author = self.request.user
+
+        if self.pub_date is None and self.is_published:
+            self.pub_date = timezone.now()
+
         super().save(*args, **kwargs)
+
+    @property
+    def rating_value(self):
+        if self.rating:
+            return self.rating
+        else:
+            return 'No one rated this post yet'
+
+    # @property
+    # def likes(self):
+    #     return self.objects.get().annotate(likes=Count(Case(When(userpostrelation__like=True, then=1))))
 
     @property
     def number_of_comments(self):
         return Comment.objects.filter(post=self).count()
+
+    @property
+    def is_published(self):
+        return self.status
 
     def __str__(self):
         return self.title
@@ -144,6 +170,11 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['pub_date']
+
+    @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post_comments__post=self).count()
+
 
     def __str__(self):
         return f"Comment by {self.name}: {self.body}"

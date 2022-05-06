@@ -6,7 +6,8 @@ Create Post - {{ block.super }}
 
 
 {% block content %}
-<form class="" action="{% url 'post_create_url' %}" method="post">
+<form class="" action="{% url 'post_create_url' %}" method="post" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html">
     {% csrf_token %}
     {% for field in form %}
     <div class="form-group">
@@ -19,6 +20,7 @@ Create Post - {{ block.super }}
         {{ field }}
     </div>
     {% endfor %}
-    <button type="submit" name="button" class="btn btn-primary">Publish Post</button>
+    <input type="submit" name="draft" value="Save as draft" class="btn btn-primary"/>
+    <input type="submit" name="publish" value="Publish post" class="btn btn-primary">
 </form>
 {% endblock %}

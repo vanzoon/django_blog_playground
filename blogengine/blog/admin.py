@@ -18,7 +18,9 @@ class TagAdmin(ModelAdmin):
 
 @admin.register(UserPostRelation)
 class UserPostRelationAdmin(ModelAdmin):
-    pass
+    fields = ['user', 'post', 'like', 'in_bookmarks', 'rate']
+    list_filter = ['user']
+
 
 @admin.register(Comment)
 class CommentAdmin(ModelAdmin):

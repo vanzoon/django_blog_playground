@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from blog.forms import *
 
-# TODO: write tests
+# TODO: write more tests
 
 
 class TagFormTestCase(TestCase):
