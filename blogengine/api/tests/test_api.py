@@ -8,8 +8,6 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from django.contrib.auth.models import User
-
 from api.serializers import *
 
 
@@ -33,21 +31,24 @@ class PostApiTestCase(APITestCase):
 
     def test_get_send_valid_response(self):
         url = reverse('post-list')
-        with CaptureQueriesContext(connection) as queries:
-            response = self.client.get(url)
-            self.assertEqual(2, len(queries))
+        response = self.client.get(url)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         posts = Post.objects.all().annotate(
             bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
             likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-            # rating=Avg('userpostrelation__rate')
-        )
+        ).order_by('id')
         serialized_data = PostSerializer(posts, many=True).data
         self.assertEqual(serialized_data, response.data)
         self.assertEqual(serialized_data[0]['likes_count'], 1)
         self.assertEqual(serialized_data[0]['rating'], '5.00')
         self.assertEqual(serialized_data[1]['likes_count'], 0)
         self.assertEqual(serialized_data[1]['rating'], None)
+
+    def test_get_response_used_optimized_queries(self):
+        url = reverse('post-list')
+        with CaptureQueriesContext(connection) as queries:
+            self.client.get(url)
+            self.assertEqual(2, len(queries))
 
     def test_create(self):
         self.client.force_login(self.user_1)
@@ -122,8 +123,8 @@ class PostApiTestCase(APITestCase):
         }
 
         json_data = json.dumps(data)
-        response = self.client.put(url, data=json_data,
-                                   content_type='application/json')
+        response = self.client.patch(url, data=json_data,
+                                     content_type='application/json')
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.data)
         self.assertEqual(2, Post.objects.all().count())
 
@@ -213,7 +214,7 @@ class UserPostRelationTestCase(APITestCase):
     def test_rate_wrong(self):
         url = reverse('userpostrelation-detail', args=(self.post_1.id,))
         data = {
-            "rate": 10,  # does not exist
+            "rate": 10,  # rate 10 does not exist
         }
         json_data = json.dumps(data)
         self.client.force_login(user=self.user_1)

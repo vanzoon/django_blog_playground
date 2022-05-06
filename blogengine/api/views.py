@@ -1,5 +1,4 @@
-from django.db.models import Count, When, Case, Avg
-from django.shortcuts import render
+from django.db.models import Count, When, Case
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import UpdateModelMixin
@@ -7,23 +6,20 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import (
-                                        BasePermission,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly
-                                       )
+    IsAuthenticated
+)
 
-from blog.models import Post, UserPostRelation
 from .serializers import *
-from .permissions import IsAuthorOrStaffOrReadOnly
+from blogengine.permissions import IsAuthorOrStaffOrReadOnly
 
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all().annotate(
         bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
         likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-#        rating=Avg('userpostrelation__rate')
     ).select_related('author').prefetch_related('viewers')
     serializer_class = PostSerializer
+
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['title', 'body']

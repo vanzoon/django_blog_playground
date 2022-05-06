@@ -1,9 +1,8 @@
+from django.http import Http404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+
 class IsAuthorOrStaffOrReadOnly(BasePermission):
-    """
-    The request is :uthenticated as a user, or is a read-only request.
-    """
 
     def has_object_permission(self, request, view, obj):
         return bool(
@@ -12,3 +11,14 @@ class IsAuthorOrStaffOrReadOnly(BasePermission):
             request.user.is_authenticated and
             (obj.author == request.user or request.user.is_staff)
         )
+
+class AuthorPermissionMixin:
+    def has_permissions(self):
+        return self.get_object().author == self.request.user
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.has_permissions():
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+

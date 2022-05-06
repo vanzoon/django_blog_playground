@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+    db:
+        image: postgres:13-alpine
+        volumes:
+            - /var/lib/postgres/data:/var/lib/postgresql/data
+        env_file:
+            - ./blogengine/db_docker.env
+
+    redis:
+        image: redis
+        ports:
+        - '6379:6379' 
+
+    web_app:
+        build: .
+        command: python ./blogengine/manage.py runserver 0.0.0.0:8080
+        env_file:
+        - ./blogengine/.env
+        volumes:
+        - .:/src
+        ports:
+        - '8080:8080'
+        depends_on:
+        - db
+        - redis
+
