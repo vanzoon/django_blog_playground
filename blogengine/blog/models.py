@@ -28,7 +28,7 @@ class PostQuerySet(models.QuerySet):
         return super().filter(status=1)
 
     def filter_author_admin(self):
-        return self.filter(author='admin')
+        return self.filter(author__username='admin')
 
     def order_by_rating_and_viewers(self):
         args = ('rating', 'viewers')
@@ -38,7 +38,7 @@ class PostQuerySet(models.QuerySet):
         return self.filter(
             Q(title__icontains=search_query) |
             Q(body__icontains=search_query)
-        ).select_related('author').prefetch_related('tags')
+        ).select_related('author')
 
 
 class PostManager(models.Manager):
@@ -108,6 +108,11 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post_comments__post=self,
+                                      post_comments__comment__active=True).count()
+
+    @property
     def rating_value(self):
         if self.rating:
             return self.rating
@@ -120,7 +125,7 @@ class Post(models.Model):
 
     @property
     def number_of_comments(self):
-        return Comment.objects.filter(post=self).count()
+        return Comment.active_on_post(self.id)
 
     @property
     def is_published(self):
@@ -173,12 +178,11 @@ class Comment(models.Model):
 
     objects = CommentManager()
 
+    def active_on_post(post_id):
+        return Comment.objects.filter(post_id=post_id,
+                                      active=True).count()
     class Meta:
         ordering = ['pub_date']
-
-    @property
-    def number_of_comments(self):
-        return Comment.objects.filter(post_comments__post=self).count()
 
     def __str__(self):
         return f"Comment by {self.name}: {self.body}"

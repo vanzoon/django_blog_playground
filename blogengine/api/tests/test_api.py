@@ -52,7 +52,7 @@ class PostApiTestCase(APITestCase):
         url = reverse('post-list')
         with CaptureQueriesContext(connection) as queries:
             self.client.get(url)
-            self.assertEqual(2, len(queries))
+            self.assertEqual(4, len(queries))
 
     def test_create(self):
         self.client.force_login(self.user_1)
@@ -72,7 +72,7 @@ class PostApiTestCase(APITestCase):
                                     content_type='application/json')
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.data)
         self.assertEqual(3, Post.objects.all().count())
-        self.assertEqual(self.user_1, Post.objects.first().author)
+        self.assertEqual(self.user_1, Post.objects.last().author)
 
     def test_delete(self):
         self.client.force_login(self.user_1)

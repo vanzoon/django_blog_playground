@@ -42,6 +42,7 @@ class PostViewsTestCase(TestCase):
         url = reverse('post_detail_url',
                       kwargs={'slug': self.post_1.slug})
         response = self.client.get(url)
+        print(dir(response))
         self.assertEqual(status.HTTP_200_OK,
                          response.status_code)
 
@@ -124,7 +125,6 @@ class TagViewsTestCase(TestCase):
         factory = RequestFactory()
         request = factory.get('blog/tag/')
         response = TagDetailView.as_view()(request, slug='exclamation1')
-        print(response.content)
         # self.assertEqual(status.HTTP_302_FOUND, response.status_code)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(self.tag_1.title, response.content['title'])
