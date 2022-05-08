@@ -7,3 +7,4 @@ from users.models import User
 @admin.register(User)
 class UserAdmin(UserAdmin):
      model = User
+

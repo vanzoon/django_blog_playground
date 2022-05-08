@@ -5,7 +5,6 @@ from blog.models import Post, UserPostRelation, Comment
 from users.models import User
 
 
-
 class PostViewersSerializer(ModelSerializer):
     class Meta:
         model = User

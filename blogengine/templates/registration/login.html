@@ -6,40 +6,46 @@ Login - {{ block.super }}
 
 
 {% block content %}
-    {% if next %}
-        {%if user.is_authenticated %}
-            <p>your account does not have access to this page. Please login with the account that has access.</p>
-        {% else %}
-            <p>please login to see this page</p>
+<div class="card card-body:">
+        {% if next %}
+            {% if user.is_authenticated %}
+                <p>
+                    your account does not have access to this page.
+                    Please login with the account that has access.
+                </p>
+            {% else %}
+                <p>
+                    please login to see this page
+                </p>
+            {% endif %}
         {% endif %}
-    {% endif %}
-<div class="my-2">
-    <a href="{% url "social:begin" "github" %}">login with Github</a>
-</div>
+    <div class="my-2">
+        <a href="{% url "social:begin" "github" %}">login with Github</a>
+    </div>
 
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-    {% for field in form %}
-    <div class="mb-3">
-        {% if field.errors %}
-            <div class="alert alert-danger">
-                {{ field.errors }}
-            </div>
-        {% endif %}
-        <div class="row my-2">
-            <div class="col-2">
-                {{ field.label }}
-            </div>
-            <div class="col-2">
-                {{ field }}
+    <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            {% if field.errors %}
+                <div class="alert alert-danger">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+            <div class="row my-2">
+                <div class="col-2">
+                    {{ field.label }}
+                </div>
+                <div class="col-2">
+                    {{ field }}
+                </div>
             </div>
         </div>
-    {% endfor %}
-  <button type="submit" class="btn btn-primary" value="login">Login</button>
-  <input type="hidden" name="next" value="{{ next }}" />
+        {% endfor %}
+      <button type="submit" class="btn btn-primary" value="login">Login</button>
+      <input type="hidden" name="next" value="{{ next }}" />
 
-  {# Assumes you setup the password_reset view in your URLconf #}
-    <a href="{% url 'password_reset' %}">Lost password?</a>
-</form>
-
+        <a href="{% url 'password_reset' %}">Lost password?</a>
+    </form>
+</div>
 {% endblock %}

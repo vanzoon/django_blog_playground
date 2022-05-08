@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Count, When
 from django.views import generic
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
-from pycparser.c_ast import Case
 
 from .forms import TagForm, PostForm, CommentForm
 from .models import Post, Tag, Comment
@@ -71,7 +69,11 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
     form_class = PostForm
     template_name = 'blog/post_create_form.html'
     permission_required = 'blog.add_post'
+    redirect_field_name = 'accounts/login'
 
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 # ... maybe it would be better to implement in get_from_kwargs?
     def post(self, request, *args, **kwargs):
@@ -130,6 +132,7 @@ class TagsListView(generic.ListView):
     model = Tag
     context_object_name = 'tags'
     template_name = 'blog/tags_list.html'
+
 
 class FavoritesView:
     pass

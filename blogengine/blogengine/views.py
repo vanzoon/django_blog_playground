@@ -1,8 +1,6 @@
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from blog.models import Post, Tag
-
 
 def redirect_to_blog(request):
     return redirect('posts_list_url', permanent=True)

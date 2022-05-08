@@ -1,14 +1,14 @@
 from time import time
 from django.db import models
-from django.db.models import Q, Count, When
+from django.db.models import Q
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
-from pycparser.c_ast import Case
 
 from blogengine import settings
 
 # TODO: pay attention to slug and cyrillic
+
 
 def gen_slug(s):
     return f'{slugify(s, allow_unicode=True)}'
@@ -18,11 +18,12 @@ class PostQuerySet(models.QuerySet):
 
     def get_queryset(self):
         return super().select_related('author').prefetch_related('tags')
-    
+
     # def get_detailed_queryset(self):
     #    return self.get_queryset().annotate(
     #        likes=Count(Case(When(userpostrelation__like=True, then=1)))
     #    )
+
     def get_published(self):
         return super().filter(status=1)
 
@@ -32,10 +33,11 @@ class PostQuerySet(models.QuerySet):
     def order_by_rating_and_viewers(self):
         args = ('rating', 'viewers')
         return self.order_by(*args)
-    
+
     def search(self, search_query):
         return self.filter(
-            Q(title__icontains=search_query) | Q(body__icontains=search_query)
+            Q(title__icontains=search_query) |
+            Q(body__icontains=search_query)
         ).select_related('author').prefetch_related('tags')
 
 
@@ -60,7 +62,8 @@ class PostManager(models.Manager):
 class CommentManager(models.Manager):
 
     def comments_for_post(self, post):
-        return super(CommentManager, self).filter(post=post, active=True)
+        return super(CommentManager, self)\
+            .filter(post=post, active=True)
 
 
 class Post(models.Model):
@@ -135,11 +138,12 @@ class UserPostRelation(models.Model):
         (4, 'good'),
         (5, 'amazing')
     )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     like = models.BooleanField(default=False)
     in_bookmarks = models.BooleanField(default=False)
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, null=True)
+    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICES, default=None, null=True)
 
     def __str__(self):
         return f'{self.user}, post: {self.post}, rated as {self.rate}'
@@ -159,7 +163,8 @@ class UserPostRelation(models.Model):
 
 class Comment(models.Model):
 
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,
+                             related_name='comments')
     name = models.CharField(max_length=50)
     email = models.EmailField()
     body = models.TextField(max_length=500)
@@ -174,7 +179,6 @@ class Comment(models.Model):
     @property
     def number_of_comments(self):
         return Comment.objects.filter(post_comments__post=self).count()
-
 
     def __str__(self):
         return f"Comment by {self.name}: {self.body}"

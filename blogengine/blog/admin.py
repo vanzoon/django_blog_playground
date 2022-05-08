@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import *
+from .models import Post, Tag, UserPostRelation, Comment
 
 
 @admin.register(Post)
