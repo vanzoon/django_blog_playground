@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'social_django',
+    # 'django_celery_beat',
     'crispy_forms',
 
     'users',
@@ -123,17 +124,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 REST_FRAMEWORK = {
-        'DEFAULT_RENDERER_CLASSES': [
-                    'rest_framework.renderers.JSONRenderer',
-                ],
-        'DEFAULT_PARSER_CLASSES': [
-                    'rest_framework.parsers.JSONParser',
-                ]
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ]
 }
 '''
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-                    'rest_framework.authentication.TokenAuthentication',
-        ]
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
 '''
 
 # Password validation
@@ -144,16 +145,20 @@ SOCIAL_AUTH_GITHUB_SECRET = env('SOCIAL_AUTH_GITHUB_SECRET')
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -169,6 +174,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+# USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -201,3 +207,5 @@ CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+# DJANGO_CELERY_BEAT
+# DJANGO_CELERY_BEAT_TZ_AWARE = False

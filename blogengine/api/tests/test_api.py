@@ -2,13 +2,15 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
-from django.db.models import Count, Case, When, Avg
+from django.db.models import Count, Case, When
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from api.serializers import *
+from api.serializers import PostSerializer
+from blog.models import Post, UserPostRelation
+from users.models import User
 
 
 class PostApiTestCase(APITestCase):
@@ -20,10 +22,12 @@ class PostApiTestCase(APITestCase):
                                           slug='asbc_dfs 123*/&()%#@!?',
                                           body='cv',
                                           author=self.user_1,
+                                          status=1
                                           )
         self.post_2 = Post.objects.create(title='sample cuter title',
                                           slug='asbc)%#@!?',
                                           body='asdf bpot',
+                                          status=0
                                           )
         UserPostRelation.objects.create(user=self.user_1, post=self.post_1, like=True)
         UserPostRelation.objects.create(user=self.user_1, post=self.post_1, rate=5)
@@ -48,7 +52,7 @@ class PostApiTestCase(APITestCase):
         url = reverse('post-list')
         with CaptureQueriesContext(connection) as queries:
             self.client.get(url)
-            self.assertEqual(2, len(queries))
+            self.assertEqual(4, len(queries))
 
     def test_create(self):
         self.client.force_login(self.user_1)
@@ -60,7 +64,7 @@ class PostApiTestCase(APITestCase):
             and MAC bridge) is networking hardware that connects devices on \
             a computer network by using packet switching to receive and \
             forward data to the destination device.",
-            "slug": "rew"
+            "slug": "net_switch"
         }
 
         json_data = json.dumps(data)
@@ -68,7 +72,7 @@ class PostApiTestCase(APITestCase):
                                     content_type='application/json')
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.data)
         self.assertEqual(3, Post.objects.all().count())
-        self.assertEqual(self.user_1, Post.objects.first().author)
+        self.assertEqual(self.user_1, Post.objects.last().author)
 
     def test_delete(self):
         self.client.force_login(self.user_1)

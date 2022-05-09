@@ -27,13 +27,13 @@ class SetRatingTestCase(TestCase):
             title='blah blah', body='love you guys'
         )
 
-        UserPostRelation.objects.create(
+        self.user_post_1 = UserPostRelation.objects.create(
             user=self.user_2, post=self.post_1, rate=1, in_bookmarks=True
         )
         UserPostRelation.objects.create(
             user=self.user_3, post=self.post_1, rate=2, like=True
         )
-        self.user_post_1 = UserPostRelation.objects.create(
+        self.user_post_2 = UserPostRelation.objects.create(
             user=self.user_3, post=self.post_1
         )
 
@@ -49,7 +49,8 @@ class SetRatingTestCase(TestCase):
         self.assertEqual(2.67, round(self.post_1.rating, 2))
 
     def test_rating_does_not_evaluate_without_changing_rate_field(self):
-        self.user_post_1.rate = 1
+        self.user_post_1.rate = 6
+        self.user_post_1.save()
 
         # instead of creating new signal specifically to set_rating() this testcase
         # limit oneself to checking indirect sign of executing of this method
@@ -59,5 +60,5 @@ class SetRatingTestCase(TestCase):
                 '''Rate field is not actually changed but set_rating() executed anyway'''
             )
 
-        self.user_post_1.rate = 1
+        self.user_post_1.rate = 6
         self.user_post_1.save()

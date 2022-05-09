@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 
 from .models import Tag, Post, Comment
 
-
 # TODO: forms are too raw
 
 
@@ -49,6 +48,7 @@ class PostForm(forms.ModelForm):
 
         return new_slug
 
+
 class CommentForm(forms.ModelForm):
 
     class Meta:
@@ -59,4 +59,3 @@ class CommentForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'body': forms.Textarea(attrs={'class': 'form-control'}),
         }
-

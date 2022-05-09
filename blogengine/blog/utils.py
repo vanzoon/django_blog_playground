@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 
-from .models import *
+from django.urls import reverse
+# custom but aren't used mixins is here
 
-# custom but none used mixins is there
 
 class ObjectDetailMixin:
     model = None
@@ -42,7 +42,7 @@ class ObjectUpdateMixin:
 
     def get(self, request, slug):
         obj = self.model.objects.get(slug__iexact=slug)
-        bound_form = self.form_model(instance=obj) 
+        bound_form = self.form_model(instance=obj)
         return render(request, self.template,
                       context={'form': bound_form,
                                self.model.__name__.lower(): obj})

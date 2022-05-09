@@ -1,7 +1,5 @@
 from django.test import TestCase
 
-from blog.forms import *
-
 # TODO: write more tests
 
 

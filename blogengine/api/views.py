@@ -9,8 +9,9 @@ from rest_framework.permissions import (
     IsAuthenticated
 )
 
-from .serializers import *
-from blogengine.permissions import IsAuthorOrStaffOrReadOnly
+from blog.models import Post, UserPostRelation
+from .serializers import PostSerializer, UserPostRelationSerializer
+from api.permissions import IsAuthorOrStaffOrReadOnly
 
 
 class PostViewSet(ModelViewSet):
@@ -42,6 +43,8 @@ class UserPostRelationView(UpdateModelMixin, GenericViewSet):
     lookup_field = "post"
 
     def get_object(self):
-        obj, _ = UserPostRelation.objects.get_or_create(user=self.request.user,
-                                                        post_id=self.kwargs['post'])
+        obj, _ = UserPostRelation.objects.\
+            get_or_create(
+                user=self.request.user,
+                post_id=self.kwargs['post'])
         return obj

@@ -9,10 +9,12 @@ Login - {{ block.super }}
 {% block content %}
         {% if user.is_authenticated %}
             {% block user_info %}
-                <p> User profile info </p>
-                <p> Username: {{ user.username }} </p>
-                <p> First name: {{ user.first_name }} </p>
-                <p> Last name: {{ user.last_name }} </p>
+                <h2 class="title text-center"> User profile info </h2>
+<div class="card card-body">
+    <p> Username: {{ user.username }} </p>
+    <p> First name: {{ user.first_name }} </p>
+    <p> Last name: {{ user.last_name }} </p>
+</div>
             {% endblock %}
         {% else %}
             <p>Your account does not have access to this page. Please login with the account that has access.</p>
