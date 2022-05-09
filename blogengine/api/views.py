@@ -11,7 +11,7 @@ from rest_framework.permissions import (
 
 from blog.models import Post, UserPostRelation
 from .serializers import PostSerializer, UserPostRelationSerializer
-from blogengine.permissions import IsAuthorOrStaffOrReadOnly
+from api.permissions import IsAuthorOrStaffOrReadOnly
 
 
 class PostViewSet(ModelViewSet):

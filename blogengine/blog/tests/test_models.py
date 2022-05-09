@@ -88,13 +88,13 @@ class PostManagerTestCase(TestCase):
     def test_get_published(self):
         published_query = Post.objects.get_published().order_by('id')
         actually_published = [self.post_2, self.post_3, self.post_5]
-        not_published = [self.post_1, self.post_4]
+        # not_published = [self.post_1, self.post_4]
         self.assertEqual(actually_published, list(published_query))
 
     def test_filter_author_admin(self):
         posted_by_admin = Post.objects.filter_author_admin().order_by('id')
         actually_posted_by_admin = [self.post_3, self.post_5]
-        posted_by_others = [self.post_1, self.post_2, self.post_4]
+        # posted_by_others = [self.post_1, self.post_2, self.post_4]
         self.assertEqual(actually_posted_by_admin,
                          list(posted_by_admin))
 

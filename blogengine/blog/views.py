@@ -1,7 +1,11 @@
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from django.views import generic
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    PermissionRequiredMixin, UserPassesTestMixin
+)
 
 from .forms import TagForm, PostForm, CommentForm
 from .models import Post, Tag, Comment
@@ -12,7 +16,7 @@ from .models import Post, Tag, Comment
 # NOTE: that is happening with permissions here...
 
 
-class ProfileView(generic.TemplateView):
+class ProfileView(LoginRequiredMixin, generic.TemplateView):
     model = get_user_model()
     context_object_name = 'user'
     template_name = 'registration/profile.html'
@@ -35,15 +39,7 @@ class PostListView(generic.ListView):
 
 class PostDetailView(generic.DetailView):
     model = Post
-    # form_class = CommentForm
     template_name = 'blog/post_detail.html'
-    # success_url = 'post_detail_url'
-
-    # def get_queryset(self):
-    #     queryset = super(PostDetailView, self).get_queryset().annotate(
-    #         bookmarked=Count(Case(When(userpostrelation__in_bookmarks=True, then=1)))
-    #     )
-    #     return queryset
 
     def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
@@ -64,7 +60,8 @@ class CommentFormView(generic.FormView):
     template_name = 'blog/post_detail.html'
 
 
-class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.CreateView):
+class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin,
+                     generic.CreateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_create_form.html'
@@ -85,22 +82,29 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, generic.Create
         return super(PostCreateView, self).post(request, *kwargs)
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin,
+                     UserPassesTestMixin, generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_update_form.html'
     permission_required = 'blog.update_post'
 
     def test_func(self):
-        obj = self.get_object()
-        return obj.author == self.request.user
+        print(self.get_object())
+        return bool(self.get_object().author == self.request.user)
 
 
-class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
+class PostDeleteView(LoginRequiredMixin, PermissionRequiredMixin,
+                     UserPassesTestMixin, generic.DeleteView):
     model = Post
     template_name = 'blog/post_delete_form.html'
-    success_url = 'posts_list_url'
     permission_required = 'blog.delete_post'
+
+    def get_success_url(self):
+        return reverse('posts_list_url')
+
+    def test_func(self):
+        return bool(self.get_object().author == self.request.user)
 
 
 class TagDetailView(generic.DetailView):
@@ -113,7 +117,8 @@ class TagCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = 'blog/tag_create.html'
 
 
-class TagUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateView):
+class TagUpdateView(LoginRequiredMixin, PermissionRequiredMixin,
+                    generic.UpdateView):
     model = Tag
     form_class = TagForm
     template_name = 'blog/tag_update_form.html'
@@ -121,11 +126,14 @@ class TagUpdateView(LoginRequiredMixin, PermissionRequiredMixin, generic.UpdateV
     raise_exception = True
 
 
-class TagDeleteView(LoginRequiredMixin, PermissionRequiredMixin, generic.DeleteView):
+class TagDeleteView(LoginRequiredMixin, PermissionRequiredMixin,
+                    generic.DeleteView):
     model = Tag
-    success_url = 'tags_list_url'
     template_name = 'blog/tag_delete_form.html'
     permission_required = 'blog.delete_tag'
+
+    def get_success_url(self):
+        return reverse('tags_list_url')
 
 
 class TagsListView(generic.ListView):

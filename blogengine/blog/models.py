@@ -36,8 +36,7 @@ class PostQuerySet(models.QuerySet):
 
     def search(self, search_query):
         return self.filter(
-            Q(title__icontains=search_query) |
-            Q(body__icontains=search_query)
+            Q(title__icontains=search_query) | Q(body__icontains=search_query)
         ).select_related('author')
 
 
@@ -108,11 +107,6 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     @property
-    def number_of_comments(self):
-        return Comment.objects.filter(post_comments__post=self,
-                                      post_comments__comment__active=True).count()
-
-    @property
     def rating_value(self):
         if self.rating:
             return self.rating
@@ -181,6 +175,7 @@ class Comment(models.Model):
     def active_on_post(post_id):
         return Comment.objects.filter(post_id=post_id,
                                       active=True).count()
+
     class Meta:
         ordering = ['pub_date']
 

@@ -6,14 +6,13 @@ class IsAuthorOrStaffOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         return bool(
             request.method in SAFE_METHODS or
-            request.user and
-            request.user.is_authenticated and
+            request.user and request.user.is_authenticated and
             (obj.author == request.user or request.user.is_staff)
         )
 
 
-class AuthorPermissionMixin:
-    def has_permissions(self):
+class AuthorPermissionMixin(BasePermission):
+    def has_permission(self):
         return self.get_object().author == self.request.user
 
     def dispatch(self, request, *args, **kwargs):
