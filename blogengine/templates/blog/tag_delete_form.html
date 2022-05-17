@@ -6,11 +6,16 @@ Delete Tag "{{ tag.title|title }}" - {{ block.super }}
 
 {% block content %}
 
-<form action="{{ tag.get_delete_url }}" method="post">
+<form action="{{ tag.get_delete_url }}" method="post" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     {% csrf_token %}
-    <h3>Are you sure you want to delete <b>"{{ tag.title }}"</b>tag?</h3>
-    <a href="{{ tag.get_absolute_url }}">Cancel</a>
-    <button type="submit" name="button" class="btn btn-danger">Delete</button>
+    <h3>Are you sure you want to delete <b>"{{ tag.title }}"</b> tag?</h3>
+<div class="container ">
+    <div class="justify-content-end d-flex">
+        <a class=" btn btn-outline-warning md-2" href="{{ tag.get_absolute_url }}">Cancel</a>
+        <button class=" btn btn-danger" type="submit" name="button">Delete</button>
+    </div>
+</div>
 </form>
 
 {% endblock %}

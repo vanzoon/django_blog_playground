@@ -15,7 +15,7 @@ class RegularUsers(Group):
 
 
 class User(AbstractUser):
-    age = models.PositiveIntegerField(default=None, null=True, blank=True)
+    birth_date = models.DateField(default=None, null=True, blank=True)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):

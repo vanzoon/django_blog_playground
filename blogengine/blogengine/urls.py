@@ -6,8 +6,6 @@ from . import settings
 from .views import redirect_to_blog, RobotsTxtView
 from send_email.views import ContactView
 
-# TODO: profile template needed
-
 
 urlpatterns = [
     path('', redirect_to_blog),

@@ -1,10 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
 from blog.models import UserPostRelation, Post, Tag
-from blog.views import PostUpdateView
 from users.models import User
 
 # TODO: write tests for tag views, in progress
@@ -67,9 +66,17 @@ class PostViewsTestCase(TestCase):
             response.context['is_paginated'] is True)
         self.assertTrue(len(response.context['posts']) == 4)
 
-    def test_get_post_exist(self):
+    def test_get_post_exist_and_not_published(self):
         url = reverse('post_detail_url',
                       kwargs={'slug': self.post_1.slug})
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'blog/post_detail.html')
+        self.assertEqual(status.HTTP_200_OK,
+                         response.status_code)
+
+    def test_get_post_exist_and_published(self):
+        url = reverse('post_detail_url',
+                      kwargs={'slug': self.post_2.slug})
         response = self.client.get(url)
         self.assertTemplateUsed(response, 'blog/post_detail.html')
         self.assertEqual(status.HTTP_200_OK,
@@ -83,32 +90,25 @@ class PostViewsTestCase(TestCase):
                          response.status_code)
 
     def test_update_unauthorised_user_post_exist(self):
-        rf = RequestFactory()
         url = reverse('post_update_url',
                       kwargs={'slug': self.post_1.slug})
-        request = rf.post(url, data={'title': 'bhbh'})
-        response = self.setup_view(PostUpdateView(), request)
+        response = self.client.get(url)
         self.assertEqual(status.HTTP_403_FORBIDDEN,
                          response.status_code)
 
     def test_update_authorised_user_post_does_not_exist(self):
         self.client.force_login(user=self.user_1)
-        rf = RequestFactory()
         url = reverse('post_update_url',
                       kwargs={'slug': 'post_slug_that_does_not_exist'})
-        request = rf.post(url, data={'title': 'bhbh'})
-        view = self.setup_view(PostUpdateView(), request)
+        response = self.client.get(url)
         self.assertEqual(status.HTTP_403_FORBIDDEN,
-                         view.context['Status-code'])
+                         response.status_code)
 
     def test_update_authorised_user_post_exist(self):
         self.client.force_login(self.user_1)
-        rf = RequestFactory()
         url = reverse('post_update_url',
                       kwargs={'slug': self.post_1.slug})
-        request = rf.post(url, data={'title': 'bhbh'})
-        request.user = self.user_1
-        # response = PostUpdateView.as_view()(request)
+        response = self.client.get(url)
 
     def test_delete_authorised_user_post_does_not_exist(self):
         self.client.force_login(user=self.user_1)
@@ -135,7 +135,6 @@ class PostViewsTestCase(TestCase):
             self.post_1.refresh_from_db()
         except ObjectDoesNotExist:
             pass
-
         self.assertEqual(status.HTTP_204_NO_CONTENT,
                          response.status_code)
 

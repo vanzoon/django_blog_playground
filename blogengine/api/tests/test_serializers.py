@@ -1,4 +1,4 @@
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, F
 from django.test import TestCase
 
 from api.serializers import PostSerializer
@@ -53,6 +53,7 @@ class PostSerializerTestCase(TestCase):
 
     def test_fields(self):
         posts = Post.objects.all().annotate(
+            author_name=F('author__username'),
             bookmarked_count=Count(Case(When(
                 userpostrelation__in_bookmarks=True, then=1))
             ),
@@ -72,7 +73,7 @@ class PostSerializerTestCase(TestCase):
                 'bookmarked_count': 2,
                 'likes_count': 2,
                 'rating': '3.00',
-                'author': 'user_1',
+                'author_name': 'user_1',
                 'viewers': [
                     {
                         'first_name': 'john',
@@ -99,7 +100,7 @@ class PostSerializerTestCase(TestCase):
                 'bookmarked_count': 0,
                 'likes_count': 1,
                 'rating': None,
-                'author': '',  # we defined default='' for that field in serializer
+                'author_name': None,
                 'viewers': [
                     {
                         'first_name': 'henz',
