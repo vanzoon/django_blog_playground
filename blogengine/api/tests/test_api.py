@@ -2,7 +2,7 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, F
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -24,9 +24,9 @@ class PostApiTestCase(APITestCase):
                                           author=self.user_1,
                                           status=1
                                           )
-        self.post_2 = Post.objects.create(title='sample cuter title',
-                                          slug='asbc)%#@!?',
-                                          body='asdf bpot',
+        self.post_2 = Post.objects.create(title='draft post title',
+                                          slug='gammagammagammma',
+                                          body='mark my words, this post i will never publish',
                                           status=0
                                           )
         UserPostRelation.objects.create(user=self.user_1, post=self.post_1, like=True)
@@ -38,21 +38,22 @@ class PostApiTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         posts = Post.objects.all().annotate(
+            author_name=F('author__username'),
             bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
             likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-        ).order_by('id')
+        )
         serialized_data = PostSerializer(posts, many=True).data
         self.assertEqual(serialized_data, response.data)
-        self.assertEqual(serialized_data[0]['likes_count'], 1)
-        self.assertEqual(serialized_data[0]['rating'], '5.00')
-        self.assertEqual(serialized_data[1]['likes_count'], 0)
-        self.assertEqual(serialized_data[1]['rating'], None)
+        self.assertEqual(serialized_data[0]['likes_count'], 0)
+        self.assertEqual(serialized_data[0]['rating'], None)
+        self.assertEqual(serialized_data[1]['likes_count'], 1)
+        self.assertEqual(serialized_data[1]['rating'], '5.00')
 
     def test_get_response_used_optimized_queries(self):
         url = reverse('post-list')
         with CaptureQueriesContext(connection) as queries:
             self.client.get(url)
-            self.assertEqual(4, len(queries))
+            self.assertEqual(3, len(queries))
 
     def test_create(self):
         self.client.force_login(self.user_1)

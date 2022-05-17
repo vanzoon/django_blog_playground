@@ -1,4 +1,4 @@
-from django.db.models import Count, When, Case
+from django.db.models import Count, When, Case, F
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import UpdateModelMixin
@@ -16,11 +16,12 @@ from api.permissions import IsAuthorOrStaffOrReadOnly
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all().annotate(
+        author_name=F('author__username'),
         bookmarked_count=Count(Case(When(userpostrelation__in_bookmarks=True, then=1))),
         likes_count=Count(Case(When(userpostrelation__like=True, then=1))),
-    ).select_related('author').prefetch_related('viewers')
+        # comments=F('')
+    ).prefetch_related('viewers', 'comments')
     serializer_class = PostSerializer
-
     permission_classes = [IsAuthorOrStaffOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filter_fields = ['title', 'body']
@@ -48,3 +49,5 @@ class UserPostRelationView(UpdateModelMixin, GenericViewSet):
                 user=self.request.user,
                 post_id=self.kwargs['post'])
         return obj
+
+

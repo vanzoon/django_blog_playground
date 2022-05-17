@@ -64,10 +64,8 @@ MIDDLEWARE = [
 ]
 if DEBUG:
     MIDDLEWARE += [
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-        'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     ]
-
 
 ROOT_URLCONF = 'blogengine.urls'
 
@@ -129,7 +127,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
-    ]
+    ],
 }
 '''
     'DEFAULT_AUTHENTICATION_CLASSES': [

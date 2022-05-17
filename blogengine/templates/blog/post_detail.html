@@ -45,8 +45,7 @@
              Likes: {{ post.likes }}
          </h4>
      </div>
-
-    </div>
+</div>
 
 
     {% for comment in comments %}
@@ -63,17 +62,16 @@
         </div>
     {% endfor %}
 
-
     {% if new_comment %}
-     <div class="card-body">
-            <h3>Leave a comment</h3>
-            <form method="post" style="margin-top: 1.3em;">
-                {% csrf_token %}
-                {{ comment_form | crispy }}
-            <button type="submit" class="btn btn-primary btn-lg">Send</button>
-            </form>
-      </div>
+         <div class="card-body">
+                <h3>Leave a comment</h3>
+                <form method="post" style="margin-top: 1.3em;">
+                    {% csrf_token %}
+                    {{ comment_form | crispy }}
+                <button type="submit" class="btn btn-primary btn-lg">Send</button>
+                </form>
+          </div>
     {% endif %}
-
 </div>
+
 {% endblock %}
