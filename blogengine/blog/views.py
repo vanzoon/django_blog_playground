@@ -12,7 +12,6 @@ from .models import Post, Tag, Comment
 
 # TODO: check queries for optimization (similar queries in PostDetail,
 #  unnecessary in TagDetail)
-# TODO: implement view for comments too..
 # NOTE: that is happening with permissions here...
 
 
@@ -82,23 +81,22 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin,
         return super(PostCreateView, self).post(request, *kwargs)
 
 
-class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin,
-                     UserPassesTestMixin, generic.UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin,
+                     generic.UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/post_update_form.html'
-    permission_required = 'blog.update_post'
+    # permission_required = 'blog.update_post'
 
     def test_func(self):
-        print(self.get_object())
         return bool(self.get_object().author == self.request.user)
 
 
-class PostDeleteView(LoginRequiredMixin, PermissionRequiredMixin,
-                     UserPassesTestMixin, generic.DeleteView):
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin,
+                     generic.DeleteView):
     model = Post
     template_name = 'blog/post_delete_form.html'
-    permission_required = 'blog.delete_post'
+    # permission_required = 'blog.delete_post'
 
     def get_success_url(self):
         return reverse('posts_list_url')

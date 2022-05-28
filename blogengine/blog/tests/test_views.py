@@ -92,30 +92,42 @@ class PostViewsTestCase(TestCase):
     def test_update_unauthorised_user_post_exist(self):
         url = reverse('post_update_url',
                       kwargs={'slug': self.post_1.slug})
-        response = self.client.get(url)
-        self.assertEqual(status.HTTP_403_FORBIDDEN,
+        response = self.client.post(url,
+                                    data = {'body': 'aaaaaa'})
+        self.assertRedirects(response, f"/accounts/login/?next={url}")
+        self.assertEqual(status.HTTP_302_FOUND,
                          response.status_code)
 
     def test_update_authorised_user_post_does_not_exist(self):
         self.client.force_login(user=self.user_1)
         url = reverse('post_update_url',
                       kwargs={'slug': 'post_slug_that_does_not_exist'})
-        response = self.client.get(url)
-        self.assertEqual(status.HTTP_403_FORBIDDEN,
+        response = self.client.post(url,
+                                    kwargs = {'slug': self.post_1.slug})
+        self.assertEqual(status.HTTP_404_NOT_FOUND,
                          response.status_code)
 
-    def test_update_authorised_user_post_exist(self):
+    def test_update_user_owner_post_exist(self):
         self.client.force_login(self.user_1)
         url = reverse('post_update_url',
                       kwargs={'slug': self.post_1.slug})
-        response = self.client.get(url)
+        response = self.client.post(url,
+                                   data={
+                                       'title': self.post_1.title,
+                                       'body': 'aaaaaa',
+                                       'tags': []})
+        self.post_1.refresh_from_db()
+        redirect_url = reverse('post_detail_url',
+                                kwargs={'slug': self.post_1.slug})
+        self.assertRedirects(response, redirect_url)
+        self.assertEqual(self.post_1.body, 'aaaaaa')
 
     def test_delete_authorised_user_post_does_not_exist(self):
         self.client.force_login(user=self.user_1)
         url = reverse('post_delete_url',
                       kwargs={'slug': 'post_slug_that_does_not_exist'})
         response = self.client.delete(url)
-        self.assertEqual(status.HTTP_403_FORBIDDEN,
+        self.assertEqual(status.HTTP_404_NOT_FOUND,
                          response.status_code)
 
     def test_delete_user_not_owner_post_exist(self):
@@ -123,11 +135,12 @@ class PostViewsTestCase(TestCase):
         url = reverse('post_delete_url',
                       kwargs={'slug': self.post_2.slug})
         response = self.client.delete(url)
-        self.assertEqual(status.HTTP_405_METHOD_NOT_ALLOWED,
+        self.assertEqual(status.HTTP_403_FORBIDDEN,
                          response.status_code)
 
     def test_delete_user_owner_post_exist(self):
         self.client.force_login(user=self.user_1)
+
         url = reverse('post_delete_url',
                       kwargs={'slug': self.post_1.slug})
         response = self.client.delete(url)
@@ -135,8 +148,8 @@ class PostViewsTestCase(TestCase):
             self.post_1.refresh_from_db()
         except ObjectDoesNotExist:
             pass
-        self.assertEqual(status.HTTP_204_NO_CONTENT,
-                         response.status_code)
+        self.assertRedirects(response, "/blog/",
+                             status_code=status.HTTP_302_FOUND)
 
 
 class TagViewsTestCase(TestCase):

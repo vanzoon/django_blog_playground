@@ -8,12 +8,10 @@ class Paginator(PageNumberPagination):
 
     def get_paginated_response(self, data):
         return Response({
-        {
             'links_to_pages':{
                 'next': self.get_next_link(),
                 'prev': self.get_previous_link(),
             },
             'on_page': self.page.paginator.count,
             'results': data
-        }
-        )
+        })
