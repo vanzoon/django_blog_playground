@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.views import generic
 
@@ -13,12 +12,6 @@ from .models import Post, Tag, Comment
 # TODO: check queries for optimization (similar queries in PostDetail,
 #  unnecessary in TagDetail)
 # NOTE: that is happening with permissions here...
-
-
-class ProfileView(LoginRequiredMixin, generic.TemplateView):
-    model = get_user_model()
-    context_object_name = 'user'
-    template_name = 'registration/profile.html'
 
 
 class PostListView(generic.ListView):
